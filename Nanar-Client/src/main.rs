@@ -1,3 +1,12 @@
+
+
+use nanar_client::*;
+
 fn main() {
-    println!("Hello, world!");
+    
+
+    println!("{}>", fs_functions::get_current_dir());
+    
+
+    fs_functions::list_current_dir();
 }

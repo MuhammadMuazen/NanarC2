@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "Nanar-Client"
+name = "nanar_client"
 version = "0.1.0"

@@ -1,0 +1,1 @@
+D:\personal\projects\NanarC2\Nanar-Client\target\debug\nanar_client.exe: D:\personal\projects\NanarC2\Nanar-Client\src\fs_functions.rs D:\personal\projects\NanarC2\Nanar-Client\src\lib.rs D:\personal\projects\NanarC2\Nanar-Client\src\main.rs
