@@ -9,10 +9,19 @@ pub fn get_current_dir() -> String {
     current_path
 }
 
+pub fn set_current_path(wanted_path: &str) -> std::io::Result<()> {
+
+    let requested_path: &std::path::Path = std::path::Path::new(wanted_path);
+
+    std::env::set_current_dir(&requested_path)?;
+
+    Ok(())
+} 
+
 pub fn list_directory_contents(dir_path: &str) -> String {
     let mut dir_contents = String::new();
     dir_contents.push_str("Perm\t\tModified\t\tSize\t\tName\n");
-    dir_contents.push_str("----------------------------------------------------------------------------\n");
+    dir_contents.push_str("----------------------------------------------------------------------\n");
     
     if let Ok(entries) = std::fs::read_dir(std::path::Path::new(dir_path)) {
         
@@ -53,3 +62,23 @@ pub fn list_directory_contents(dir_path: &str) -> String {
     dir_contents
 }
 
+// creart, read, write, copy, move file
+// read file
+pub fn read_file_content(file_path: &str) -> String {
+
+    let file_content: String = std::fs::read_to_string(file_path).expect("File Content");
+
+    file_content
+}
+
+// write file
+pub fn write_to_file(file_path: &str, content_to_write: &str) -> std::io::Result<()> {
+
+    if !std::path::Path::new(file_path).exists() {
+        
+        let mut new_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(file_path);
+        new_file.write_all(content_to_write)?;
+    }
+
+    Ok(())
+}
