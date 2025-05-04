@@ -1,5 +1,3 @@
-
-
 use nanar_client::*;
 
 fn main() {

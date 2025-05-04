@@ -11,7 +11,8 @@ pub fn get_current_dir() -> String {
 
 pub fn list_directory_contents(dir_path: &str) -> String {
     let mut dir_contents = String::new();
-    dir_contents.push_str("Type\tPerms\t\tModified\t\tSize\t\tName\n");
+    dir_contents.push_str("Perm\t\tModified\t\tSize\t\tName\n");
+    dir_contents.push_str("----------------------------------------------------------------------------\n");
     
     if let Ok(entries) = std::fs::read_dir(std::path::Path::new(dir_path)) {
         
@@ -20,13 +21,6 @@ pub fn list_directory_contents(dir_path: &str) -> String {
             if let Ok(metadata) = entry.metadata() {
                 
                 let file_name: String = entry.file_name().to_string_lossy().into_owned();
-                let file_type: &str = if metadata.is_dir() {
-                    "D"
-                } else if metadata.is_file() {
-                    "F"
-                } else {
-                    "O"
-                };
                 
                 // Get directory size
                 let size: u64 = if metadata.is_dir() {
@@ -51,13 +45,7 @@ pub fn list_directory_contents(dir_path: &str) -> String {
                 let perms: String = fs_helper::get_permissions(&entry, &metadata);
                 
                 dir_contents.push_str(&format!(
-                    "{}\t{}\t{}\t{}\t\t{}\n", 
-                    file_type, 
-                    perms,
-                    modified, 
-                    size_str, 
-                    file_name
-                ));
+                    "{}\t{}\t{}\t\t{}\n", perms, modified, size_str, file_name));
             }
         }
     }
