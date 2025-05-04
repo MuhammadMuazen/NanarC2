@@ -19,7 +19,7 @@ pub fn set_current_path(wanted_path: &str) -> std::io::Result<()> {
 } 
 
 pub fn list_directory_contents(dir_path: &str) -> String {
-    let mut dir_contents = String::new();
+    let mut dir_contents: String = String::new();
     dir_contents.push_str("Perm\t\tModified\t\tSize\t\tName\n");
     dir_contents.push_str("----------------------------------------------------------------------\n");
     
@@ -71,14 +71,17 @@ pub fn read_file_content(file_path: &str) -> String {
     file_content
 }
 
+use std::io::Write;
+
 // write file
-pub fn write_to_file(file_path: &str, content_to_write: &str) -> std::io::Result<()> {
-
-    if !std::path::Path::new(file_path).exists() {
-        
-        let mut new_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(file_path);
-        new_file.write_all(content_to_write)?;
-    }
-
+pub fn write_to_file(file_path: &str, content: &str) -> std::io::Result<()> {
+    
+    let mut file: std::fs::File = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(file_path)?;
+    
+    file.write_all(content.as_bytes())?;
+    
     Ok(())
 }

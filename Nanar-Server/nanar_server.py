@@ -11,7 +11,7 @@ def create_socket():
         host = ""
         port = 9999
         s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
     except socket.error as msg:
         print("Socket creation error: " + str(msg))
