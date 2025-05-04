@@ -79,13 +79,27 @@ fn main() {
     /*
         Testing moving a file
     */
-    let mv: Result<(), std::io::Error> = fs_functions::move_file_dir(
-        r"C:\Users\muhammad\Desktop\1\txt.txt", r"C:\Users\muhammad\Desktop\2\1.txt");
+    // let mv: Result<(), std::io::Error> = fs_functions::move_file_dir(
+    //     r"C:\Users\muhammad\Desktop\1\txt.txt", r"C:\Users\muhammad\Desktop\2\1.txt");
     
-    if mv.is_ok() {
-        println!("Fine");
-    } else if mv.is_err() {
-        println!("{}", std::io::Error::last_os_error());
-    }
+    // if mv.is_ok() {
+    //     println!("Fine");
+    // } else if mv.is_err() {
+    //     println!("{}", std::io::Error::last_os_error());
+    // }
+
+    /*
+        Tesing Connection
+    */
+
+    // let conn: Result<(), std::io::Error> = connection_handler::init_conn_with_server(
+    //     "127.0.0.1:9999", "Hello");
+    
+    // if conn.is_ok() {
+    //     println!("Fine");
+    // } else if conn.is_err() {
+    //     println!("{}", std::io::Error::last_os_error());
+    // }
+
 
 }
