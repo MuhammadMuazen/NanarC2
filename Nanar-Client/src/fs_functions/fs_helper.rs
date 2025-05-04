@@ -1,29 +1,7 @@
+// Get system time
 pub fn system_time_to_readable(st: std::time::SystemTime) -> String {
     let datetime: chrono::DateTime<chrono::Local> = st.into();
     datetime.format("%Y-%m-%d %H:%M:%S").to_string()
-}
-
-
-pub fn get_dir_size(path: &std::path::Path) -> Result<u64, std::io::Error> {
-    
-    let mut total: u64 = 0;
-    
-    if path.is_dir() {
-        
-        for entry in std::fs::read_dir(path)? {
-            
-            let entry: std::fs::DirEntry = entry?;
-            let path: std::path::PathBuf = entry.path();
-            
-            if path.is_dir() {
-                total += get_dir_size(&path)?;
-            } else {
-                total += entry.metadata()?.len();
-            }
-        }
-    }
-    
-    Ok(total)
 }
 
 // permission information

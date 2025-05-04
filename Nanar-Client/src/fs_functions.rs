@@ -33,7 +33,7 @@ pub fn list_directory_contents(dir_path: &str) -> String {
                 
                 // Get directory size
                 let size: u64 = if metadata.is_dir() {
-                    fs_helper::get_dir_size(&entry.path()).unwrap_or(0)
+                    0
                 } else {
                     metadata.len()
                 };
@@ -64,24 +64,82 @@ pub fn list_directory_contents(dir_path: &str) -> String {
 
 // creart, read, write, copy, move file
 // read file
-pub fn read_file_content(file_path: &str) -> String {
+pub fn read_file_content(file_path_str: &str) -> String {
 
-    let file_content: String = std::fs::read_to_string(file_path).expect("File Content");
+    let file_content: String = std::fs::read_to_string(file_path_str).expect("File Content");
 
     file_content
 }
 
-use std::io::Write;
+use std::{fs, io::Write};
 
 // write file
-pub fn write_to_file(file_path: &str, content: &str) -> std::io::Result<()> {
+pub fn write_to_file(file_path_str: &str, content: &str) -> std::io::Result<()> {
     
     let mut file: std::fs::File = std::fs::OpenOptions::new()
         .create(true)
         .append(true)
-        .open(file_path)?;
+        .open(file_path_str)?;
     
     file.write_all(content.as_bytes())?;
     
+    Ok(())
+}
+
+// Remvoe file
+pub fn remove_file(file_path_str: &str) -> std::io::Result<()> {
+
+    fs::remove_file(file_path_str)?;
+
+    Ok(())
+}
+
+// Creart directory
+pub fn create_dir(dir_path_str: &str) -> std::io::Result<()> {
+    
+    fs::create_dir(dir_path_str)?;
+
+    Ok(())
+}
+
+// Remove directory
+pub fn remove_dir(dir_path_str: &str) -> std::io::Result<()> {
+
+    fs::remove_dir(dir_path_str)?;
+
+    Ok(())
+}
+
+// copy file or dir
+pub fn copy_file_dir(source_path_str: &str, destination_path_str: &str) -> std::io::Result<()> {
+
+    let source_path: &std::path::Path= std::path::Path::new(&source_path_str);
+    let destination_path: &std::path::Path = std::path::Path::new(&destination_path_str);
+    
+    if source_path.is_dir() {
+        // Create destination directory if it doesn't exist
+        fs::create_dir_all(destination_path)?;
+        
+        // Recursively copy directory contents
+        for entry in fs::read_dir(source_path)? {
+            
+            let entry: fs::DirEntry = entry?;
+            let entry_path: std::path::PathBuf = entry.path();
+            let dest_path: std::path::PathBuf = destination_path.join(entry.file_name());
+            
+            if entry_path.is_dir() {
+                copy_file_dir(entry_path.to_str().unwrap(), dest_path.to_str().unwrap())?;
+            } else {
+                fs::copy(entry_path, dest_path)?;
+            }
+        }
+    } else {
+        // If source is a file, ensure parent directory exists
+        if let Some(parent) = destination_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::copy(source_path, destination_path)?;
+    }
+
     Ok(())
 }
