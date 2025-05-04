@@ -117,6 +117,7 @@ pub fn copy_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
     let destination_path: &std::path::Path = std::path::Path::new(&destination_path_str);
     
     if source_path.is_dir() {
+        
         // Create destination directory if it doesn't exist
         fs::create_dir_all(destination_path)?;
         
@@ -128,17 +129,46 @@ pub fn copy_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
             let dest_path: std::path::PathBuf = destination_path.join(entry.file_name());
             
             if entry_path.is_dir() {
-                copy_file_dir(entry_path.to_str().unwrap(), dest_path.to_str().unwrap())?;
+                copy_file_dir(
+                    entry_path.to_str().unwrap(), dest_path.to_str().unwrap())?;
             } else {
                 fs::copy(entry_path, dest_path)?;
             }
         }
     } else {
+
         // If source is a file, ensure parent directory exists
         if let Some(parent) = destination_path.parent() {
             fs::create_dir_all(parent)?;
         }
+        
         fs::copy(source_path, destination_path)?;
+    }
+
+    Ok(())
+}
+
+// move file or dir
+pub fn move_file_dir(source_path_str: &str, destination_path_str: &str) -> std::io::Result<()> {
+    
+    let source_path: &std::path::Path = std::path::Path::new(source_path_str);
+    let destination_path: &std::path::Path = std::path::Path::new(destination_path_str);
+
+    // First rename
+    match fs::rename(source_path, destination_path) {
+        Ok(_) => return Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::CrossesDevices => {}
+        Err(e) => return Err(e),
+    }
+
+    // Copy then delete (for cross-filesystem moves)
+    copy_file_dir(source_path_str, destination_path_str)?;
+
+    // Remove the original
+    if source_path.is_dir() {
+        fs::remove_dir_all(source_path)?;
+    } else {
+        fs::remove_file(source_path)?;
     }
 
     Ok(())

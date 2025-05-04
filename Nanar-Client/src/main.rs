@@ -76,5 +76,16 @@ fn main() {
     //     println!("{}", std::io::Error::last_os_error());
     // }
 
+    /*
+        Testing moving a file
+    */
+    let mv: Result<(), std::io::Error> = fs_functions::move_file_dir(
+        r"C:\Users\muhammad\Desktop\1\txt.txt", r"C:\Users\muhammad\Desktop\2\1.txt");
     
+    if mv.is_ok() {
+        println!("Fine");
+    } else if mv.is_err() {
+        println!("{}", std::io::Error::last_os_error());
+    }
+
 }
