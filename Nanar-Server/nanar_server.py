@@ -53,6 +53,8 @@ def main():
 
 if __name__ == '__main__':
     
+    # You can add all of this to a seperated function
+    # Or even move it to commands_handler or make a new args_handler file
     try:
         if len(sys.argv) <= 1:
             commands_handler.print_logo()

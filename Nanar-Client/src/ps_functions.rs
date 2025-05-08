@@ -1,5 +1,3 @@
-use crate::fs_functions::get_current_dir;
-
 pub fn run_exec(exec_file_name: &str, args: &str) {
 
     std::process::Command::new(exec_file_name)
