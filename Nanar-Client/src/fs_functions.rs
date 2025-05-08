@@ -1,3 +1,4 @@
+use std::io::Write;
 mod fs_helper;
 
 pub fn get_current_dir() -> String {
@@ -71,8 +72,6 @@ pub fn read_file_content(file_path_str: &str) -> String {
     file_content
 }
 
-use std::{fs, io::Write};
-
 // write file
 pub fn write_to_file(file_path_str: &str, content: &str) -> std::io::Result<()> {
     
@@ -89,7 +88,7 @@ pub fn write_to_file(file_path_str: &str, content: &str) -> std::io::Result<()> 
 // Remvoe file
 pub fn remove_file(file_path_str: &str) -> std::io::Result<()> {
 
-    fs::remove_file(file_path_str)?;
+    std::fs::remove_file(file_path_str)?;
 
     Ok(())
 }
@@ -97,7 +96,7 @@ pub fn remove_file(file_path_str: &str) -> std::io::Result<()> {
 // Creart directory
 pub fn create_dir(dir_path_str: &str) -> std::io::Result<()> {
     
-    fs::create_dir(dir_path_str)?;
+    std::fs::create_dir(dir_path_str)?;
 
     Ok(())
 }
@@ -105,7 +104,7 @@ pub fn create_dir(dir_path_str: &str) -> std::io::Result<()> {
 // Remove directory
 pub fn remove_dir(dir_path_str: &str) -> std::io::Result<()> {
 
-    fs::remove_dir(dir_path_str)?;
+    std::fs::remove_dir(dir_path_str)?;
 
     Ok(())
 }
@@ -119,12 +118,12 @@ pub fn copy_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
     if source_path.is_dir() {
         
         // Create destination directory if it doesn't exist
-        fs::create_dir_all(destination_path)?;
+        std::fs::create_dir_all(destination_path)?;
         
         // Recursively copy directory contents
-        for entry in fs::read_dir(source_path)? {
+        for entry in std::fs::read_dir(source_path)? {
             
-            let entry: fs::DirEntry = entry?;
+            let entry: std::fs::DirEntry = entry?;
             let entry_path: std::path::PathBuf = entry.path();
             let dest_path: std::path::PathBuf = destination_path.join(entry.file_name());
             
@@ -132,17 +131,17 @@ pub fn copy_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
                 copy_file_dir(
                     entry_path.to_str().unwrap(), dest_path.to_str().unwrap())?;
             } else {
-                fs::copy(entry_path, dest_path)?;
+                std::fs::copy(entry_path, dest_path)?;
             }
         }
     } else {
 
         // If source is a file, ensure parent directory exists
         if let Some(parent) = destination_path.parent() {
-            fs::create_dir_all(parent)?;
+            std::fs::create_dir_all(parent)?;
         }
         
-        fs::copy(source_path, destination_path)?;
+        std::fs::copy(source_path, destination_path)?;
     }
 
     Ok(())
@@ -155,7 +154,7 @@ pub fn move_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
     let destination_path: &std::path::Path = std::path::Path::new(destination_path_str);
 
     // First rename
-    match fs::rename(source_path, destination_path) {
+    match std::fs::rename(source_path, destination_path) {
         Ok(_) => return Ok(()),
         Err(e) if e.kind() == std::io::ErrorKind::CrossesDevices => {}
         Err(e) => return Err(e),
@@ -166,9 +165,9 @@ pub fn move_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
 
     // Remove the original
     if source_path.is_dir() {
-        fs::remove_dir_all(source_path)?;
+        std::fs::remove_dir_all(source_path)?;
     } else {
-        fs::remove_file(source_path)?;
+        std::fs::remove_file(source_path)?;
     }
 
     Ok(())
