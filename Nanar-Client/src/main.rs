@@ -3,5 +3,5 @@ use nanar_client::*;
 
 fn main() {
     
-    println!("{}", ps_mgmt::process_list());
+    println!("{}", ps_functions::process_list());
 }

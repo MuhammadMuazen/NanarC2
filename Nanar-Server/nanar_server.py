@@ -1,5 +1,7 @@
-import socket
+import commands_handler
 import threading
+import socket
+import sys
 
 IP = '0.0.0.0'
 PORT = 9998
@@ -50,4 +52,29 @@ def main():
         client_handler.start()
 
 if __name__ == '__main__':
-    main()
+    
+    try:
+        if len(sys.argv) <= 1:
+            commands_handler.print_logo()
+            # TODO run the server
+        
+        if len(sys.argv) >= 2:
+            # Check if the provided argument in avaliable
+            if sys.argv[1] not in commands_handler.AVALIABLE_EXECUTION_COMMANDS:
+                exit("\n\t[-] Command not found!\n\t[+] Use { -h, --help } to print the help message\n")
+            # If the argument is avaliable
+            elif sys.argv[1] in commands_handler.AVALIABLE_EXECUTION_COMMANDS:
+                # If the argument is { -h, --help } print the execution help message
+                if sys.argv[1] == '-h' or sys.argv[1] == '--help':
+                    print(commands_handler.execution_args_help_message())
+                # If the argument is { -l, --logo } print the logo
+                elif sys.argv[1] == '-l' or sys.argv[1] == '--logo':
+                    commands_handler.print_logo()
+                # If the argument is { -c, --commands } print all the avaliable commands inside the running server
+                elif sys.argv[1] == '-c' or sys.argv[1] == '--commands':
+                    print(commands_handler.avaliable_commands())
+    except:
+        exit("\n\t[-] Something went wrong!\n\t[+] Use { -h, --help } to print the help message\n")
+    
+    #print(commands_handler.execution_args_help_message())
+    #main()
