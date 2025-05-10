@@ -34,7 +34,7 @@ pub fn process_list() -> String {
                 format!(
                     "Process Id --> {}\nProcess Name --> {}\nProcess User --> {}\nProcess Executable File --> {}\n\
                     Arch --> Is_WoW: {}, Process_Arch: {}, Native_Arch: {}\n\
-                    Memory Usage --> {} MB\n\
+                    Memory Usage --> {:.3} MB\n\
                     \n---------------------------------------------------------------------------\n", 
                     task.get_pid(), 
                     task.get_pname(), 
@@ -43,7 +43,7 @@ pub fn process_list() -> String {
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).0,
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).1,
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).2,
-                    task.get_memory_info().get_total_memory_usage() / (1024 * 1024))
+                    task.get_memory_info().get_total_memory_usage() as f32 / (1024f32 * 1024f32))
                     .as_str());
         }
     }
