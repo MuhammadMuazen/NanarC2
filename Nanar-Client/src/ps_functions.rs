@@ -14,11 +14,12 @@ pub fn process_list() -> String {
     for task in task_list {
 
         if task.get_user().is_err() {
+
             task_list_buffer.push_str(
                 format!(
-                    "Process Id --> {}\nProcess Name: {}\nProcess User --> {}\nProcess Executable File --> {}\n\
+                    "Process Id --> {}\nProcess Name: {}\nProcess User --> {}\nExecutable Path --> {}\n\
                     Arch --> Is_WoW: {}, Process_Arch: {}, Native_Arch: {}\n\
-                    Memory Usage --> {} MB\n\
+                    Memory Usage --> {:.3} MB\nParent Process ID: {}\nProcess SID: {}\
                     \n---------------------------------------------------------------------------\n", 
                     task.get_pid(), 
                     task.get_pname(), 
@@ -27,14 +28,16 @@ pub fn process_list() -> String {
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).0,
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).1,
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).2,
-                    task.get_memory_info().get_total_memory_usage() / (1024 * 1024))
+                    task.get_memory_info().get_total_memory_usage() as f32 / (1024f32 * 1024f32),
+                    task.get_parrent().unwrap_or(0),
+                    task.get_sid().unwrap_or("[-] Error: Access is denied".to_string()))
                     .as_str());
         } else {
             task_list_buffer.push_str(
                 format!(
-                    "Process Id --> {}\nProcess Name --> {}\nProcess User --> {}\nProcess Executable File --> {}\n\
+                    "Process Id --> {}\nProcess Name --> {}\nProcess User --> {}\nExecutable Path --> {}\n\
                     Arch --> Is_WoW: {}, Process_Arch: {}, Native_Arch: {}\n\
-                    Memory Usage --> {:.3} MB\n\
+                    Memory Usage --> {:.3} MB\nParent Process ID: {}\nProcess SID: {}\
                     \n---------------------------------------------------------------------------\n", 
                     task.get_pid(), 
                     task.get_pname(), 
@@ -43,10 +46,35 @@ pub fn process_list() -> String {
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).0,
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).1,
                     task.get_architecture_info().unwrap_or((false, "UNKNOWN", "UNKNOWN")).2,
-                    task.get_memory_info().get_total_memory_usage() as f32 / (1024f32 * 1024f32))
+                    task.get_memory_info().get_total_memory_usage() as f32 / (1024f32 * 1024f32),
+                    task.get_parrent().unwrap_or(0),
+                    task.get_sid().unwrap_or("[-] Unable to get the process SID!".to_string()))
                     .as_str());
         }
     }
 
     task_list_buffer
 }   
+
+pub fn process_kill(process_id: u32) -> String {
+    
+    let task_list: tasklist::Tasklist = match tasklist::Tasklist::new() {
+        
+        Ok(list) => list,
+        Err(e) => return format!("[-] Error: Failed to get task list: {}", e),
+    };
+
+    for task in task_list {
+        
+        if task.get_pid() == process_id {
+            
+            return match task.kill() {
+                
+                Ok(_) => format!("[+] Process {} killed successfully!", process_id),
+                Err(e) => format!("[-] Error: Failed to kill process {}: {}", process_id, e),
+            };
+        }
+    }
+
+    format!("[-] Error: No process found with ID: {}", process_id)
+}
