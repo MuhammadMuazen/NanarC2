@@ -1,5 +1,6 @@
 use std::io::{Read, Write};
 
+// TODO Still in testing
 pub fn init_conn_with_server(addr_port: &str, init_conn_pass: &str) -> std::io::Result<()> {
 
     let mut time_before_heartbeat: i16 = 3000;
