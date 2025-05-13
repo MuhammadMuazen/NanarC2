@@ -12,7 +12,7 @@ if __name__ == "__main__":
         server_sock.listen(5)
         
         while True:
-            conn, addr = server_sock.accept()  # Fixed order of variables
+            conn, addr = server_sock.accept()
             print(f'Connection from {addr}')
             
             try:
@@ -25,7 +25,7 @@ if __name__ == "__main__":
             finally:
                 conn.close()
                 
-    except Exception as e:  # More specific exception handling
+    except Exception as e:
         print(f"[-] Error: {e}")
     finally:
         if server_sock:
