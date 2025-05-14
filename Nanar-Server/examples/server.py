@@ -21,6 +21,11 @@ if __name__ == "__main__":
                     if not data:
                         break
                     print(f'data: {data}')
+                    
+                    if data == b'CHECK_SERVER_MSG':
+                        print("[+] Checking if the server is up")
+                        conn.send(b'SERVER_IS_UP_MSG')
+                        
                     conn.send(data)
             finally:
                 conn.close()

@@ -11,72 +11,104 @@ const KEY_EXCHANGE_FAILED_MSG: &[u8] = "KEY_EXCHANGE_FAILED_MSG".as_bytes();
 // TODO Still in testing (add more connection functions)
 pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pass: &str) -> std::io::Result<()> {
 
-    let mut time_before_heartbeat: u16 = 3000;
+    // Times vars
+    let time_before_heartbeat: u16 = 3000;
     let duration_before_heartbeat: std::time::Duration = std::time::Duration::from_millis(time_before_heartbeat.into());
 
-    let mut buffer: [u8; 1024]   = [0; 1024];
+    // Server ip and port
     let server_ip_u8: [u8; 4] = connection_helper::ip_to_u8_array(server_addr).unwrap();
     let server_port_u16: u16 = server_port.parse().expect("[!] Failed to parse the port number to u16");
-
     let server_ip_addr: std::net::Ipv4Addr = std::net::Ipv4Addr::new(
         server_ip_u8[0], server_ip_u8[1], server_ip_u8[2], server_ip_u8[3]
     );
 
+    // Socket addr var
     let sock_addr: std::net::SocketAddr = std::net::SocketAddr::new(
          std::net::IpAddr::V4(server_ip_addr), server_port_u16);
+
+    // Temp Buffer (TODO Change later)
+    let mut buffer: [u8; 1024]   = [0; 1024];
 
     match std::net::TcpStream::connect_timeout(&sock_addr, duration_before_heartbeat) {
         Err(e) => {
             println!("[!] Error: Connection inilization timeout: {}", e);
-            heartbeat(time_before_heartbeat);
+            heartbeat(time_before_heartbeat, "INIT_CONNECTION_FAILED");
         },
-        Ok(stream) => {
+        Ok(mut stream) => {
 
+            stream.set_write_timeout(Some(duration_before_heartbeat))?;
+            stream.set_read_timeout(Some(duration_before_heartbeat))?;
             
+            match stream.write(CHECK_SERVER_MSG) {
+                
+                Ok(_) => println!("[+] Sent {:?}", CHECK_SERVER_MSG),
+                Err(e) => {
+                    println!("[!] Error: Sending connection initilization key failed {}", e);
+                    heartbeat(time_before_heartbeat, "INIT_KEY_SENDING_FAILED");
+                }
+            }
+
+            match stream.read(&mut buffer) {
+                
+                Ok(data) if data > 0 => {
+                    let server_response: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..data]);
+                    if server_response.to_string().as_bytes() == SERVER_IS_UP_MSG {
+                        println!("[+] Server is up! {}", server_response)
+                    }
+                },
+                Ok(_) => {
+                    println!("Server closed the connection");
+                },
+                Err(e) => {
+                    eprintln!("Read failed: {}", e);
+                }
+            }
+            
+            stream.shutdown(std::net::Shutdown::Both).expect("shutdown call failed");
         }
     }
 
-    loop {
+    // loop {
         
-        match stream.write_all(init_conn_pass.as_bytes()) {
+    //     match stream.write_all(init_conn_pass.as_bytes()) {
             
-            Ok(_) => println!("[+] Write suc"),
-            Err(e) => eprintln!("Write failed: {}", e),
-        }
+    //         Ok(_) => println!("[+] Write suc"),
+    //         Err(e) => eprintln!("Write failed: {}", e),
+    //     }
 
-        match stream.read(&mut buffer) {
-            Ok(n) if n > 0 => {
-                let response = String::from_utf8_lossy(&buffer[..n]);
-                println!("Server response: {}", response);
-            }
-            Ok(_) => {
-                println!("Server closed the connection");
-                break;
-            }
-            Err(e) => {
-                eprintln!("Read failed: {}", e);
-                break;
-            }
-        }
+    //     match stream.read(&mut buffer) {
+    //         Ok(n) if n > 0 => {
+    //             let response = String::from_utf8_lossy(&buffer[..n]);
+    //             println!("Server response: {}", response);
+    //         }
+    //         Ok(_) => {
+    //             println!("Server closed the connection");
+    //             break;
+    //         }
+    //         Err(e) => {
+    //             eprintln!("Read failed: {}", e);
+    //             break;
+    //         }
+    //     }
 
-        std::thread::sleep(std::time::Duration::from_millis(1000));
+    //     std::thread::sleep(std::time::Duration::from_millis(1000));
         
-        time_before_heartbeat -= 1000;
+    //     time_before_heartbeat -= 1000;
 
-        if time_before_heartbeat == 0 {
+    //     if time_before_heartbeat == 0 {
             
-            break;
-        }
-    }
+    //         break;
+    //     }
+    // }
 
 
 
-    stream.shutdown(std::net::Shutdown::Both).expect("shutdown call failed");
+    
 
     Ok(())
 }
 
-pub fn heartbeat(time_sec: u16) {
+pub fn heartbeat(time_sec: u16, reason: &str) {
 
 
 }
