@@ -4,7 +4,7 @@ mod connection_helper;
 const CHECK_SERVER_MSG: &[u8] = "CHECK_SERVER_MSG".as_bytes();
 const SERVER_IS_UP_MSG: &[u8] = "SERVER_IS_UP_MSG".as_bytes();
 const SERVER_IS_DOWN_MSG: &[u8] = "SERVER_IS_DOWN_MSG".as_bytes();
-const CLIENT_INIT_CONN_KEY_MSG: &[u8] = "CLIENT_INIT_CONN_KEY_MSG".as_bytes();
+const CLIENT_INIT_CONN_KEY_MSG: &[u8] = "CLIENT_INIT_CONN_KEY_MS".as_bytes();
 const KEY_EXCHANGE_SUCCEEDED_MSG: &[u8] = "KEY_EXCHANGE_SUCCEEDED_MSG".as_bytes();
 const KEY_EXCHANGE_FAILED_MSG: &[u8] = "KEY_EXCHANGE_FAILED_MSG".as_bytes();
 
@@ -30,6 +30,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
     let mut buffer: [u8; 1024]   = [0; 1024];
 
     match std::net::TcpStream::connect_timeout(&sock_addr, duration_before_heartbeat) {
+        
         Err(e) => {
             println!("[!] Error: Connection inilization timeout: {}", e);
             heartbeat(time_before_heartbeat, "INIT_CONNECTION_FAILED");
@@ -52,8 +53,10 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 
                 Ok(data) if data > 0 => {
                     let server_response: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..data]);
+                    
                     if server_response.to_string().as_bytes() == SERVER_IS_UP_MSG {
-                        println!("[+] Server is up! {}", server_response)
+                        
+                        println!("Server Is UP {:?}", server_response)
                     }
                 },
                 Ok(_) => {
@@ -61,49 +64,50 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 },
                 Err(e) => {
                     eprintln!("Read failed: {}", e);
+                    heartbeat(time_before_heartbeat, "FAILED_READ_DATA_FROM_SERVER");
+                }
+            }
+            
+            match stream.write(CLIENT_INIT_CONN_KEY_MSG) {
+
+                Ok(_) => {
+                    println!("[+] Send initlization key to the server")
+                }
+                Err(e) => {
+
+                    println!("[!] Error sending the key {}", e);
+                    heartbeat(time_before_heartbeat, "COULD_NOT_SEND_KEY");
+                }
+            }
+
+            match stream.read(&mut buffer) {
+                
+                Ok(data) if data > 0 => {
+                    let server_response: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..data]);
+                    
+                    if server_response.to_string().as_bytes() == KEY_EXCHANGE_SUCCEEDED_MSG {
+                        
+                        println!("[+] Key exchange sucess!");
+                    }
+                    else if server_response.to_string().as_bytes() == KEY_EXCHANGE_FAILED_MSG {
+
+                        println!("[!] Key exchange failed becuase it was wrong! {}", server_response);
+                        heartbeat(time_before_heartbeat, "WRONG_KEY");
+                    }
+                },
+                Ok(_) => {
+                    println!("Server closed the connection");
+                },
+                Err(e) => {
+                    eprintln!("[!] Error: key exchage failed failed: {}", e);
+                    heartbeat(time_before_heartbeat, "KEY_EXCHANGE_FAILED_MSG");;
                 }
             }
             
             stream.shutdown(std::net::Shutdown::Both).expect("shutdown call failed");
+
         }
     }
-
-    // loop {
-        
-    //     match stream.write_all(init_conn_pass.as_bytes()) {
-            
-    //         Ok(_) => println!("[+] Write suc"),
-    //         Err(e) => eprintln!("Write failed: {}", e),
-    //     }
-
-    //     match stream.read(&mut buffer) {
-    //         Ok(n) if n > 0 => {
-    //             let response = String::from_utf8_lossy(&buffer[..n]);
-    //             println!("Server response: {}", response);
-    //         }
-    //         Ok(_) => {
-    //             println!("Server closed the connection");
-    //             break;
-    //         }
-    //         Err(e) => {
-    //             eprintln!("Read failed: {}", e);
-    //             break;
-    //         }
-    //     }
-
-    //     std::thread::sleep(std::time::Duration::from_millis(1000));
-        
-    //     time_before_heartbeat -= 1000;
-
-    //     if time_before_heartbeat == 0 {
-            
-    //         break;
-    //     }
-    // }
-
-
-
-    
 
     Ok(())
 }

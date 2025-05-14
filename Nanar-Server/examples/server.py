@@ -1,5 +1,14 @@
 import socket
 
+CHECK_SERVER_MSG = b'CHECK_SERVER_MSG'
+SERVER_IS_UP_MSG = b'SERVER_IS_UP_MSG'
+SERVER_IS_DOWN_MSG = b'SERVER_IS_DOWN_MSG'
+CLIENT_INIT_CONN_KEY_MSG = b'CLIENT_INIT_CONN_KEY_MSG'
+KEY_EXCHANGE_SUCCEEDED_MSG = b'KEY_EXCHANGE_SUCCEEDED_MSG'
+KEY_EXCHANGE_FAILED_MSG = b'KEY_EXCHANGE_FAILED_MSG'
+
+DONE_INIT_PROCESS_LIST = []
+
 if __name__ == "__main__":
     server_sock = None
     try:
@@ -22,14 +31,23 @@ if __name__ == "__main__":
                         break
                     print(f'data: {data}')
                     
-                    if data == b'CHECK_SERVER_MSG':
+                    if data == CHECK_SERVER_MSG:
+                        DONE_INIT_PROCESS_LIST.append(CHECK_SERVER_MSG)
                         print("[+] Checking if the server is up")
-                        conn.send(b'SERVER_IS_UP_MSG')
-                        
-                    conn.send(data)
+                        conn.send(SERVER_IS_UP_MSG)
+                        DONE_INIT_PROCESS_LIST.append(SERVER_IS_UP_MSG)
+                    elif data == CLIENT_INIT_CONN_KEY_MSG and DONE_INIT_PROCESS_LIST[len(DONE_INIT_PROCESS_LIST) - 1] == SERVER_IS_UP_MSG:
+                        DONE_INIT_PROCESS_LIST.append(CLIENT_INIT_CONN_KEY_MSG)
+                        print(f'[+] Got the inilization key from the client')
+                        conn.send(KEY_EXCHANGE_SUCCEEDED_MSG)
+                        DONE_INIT_PROCESS_LIST.append(KEY_EXCHANGE_SUCCEEDED_MSG)
+                    elif data != CLIENT_INIT_CONN_KEY_MSG and DONE_INIT_PROCESS_LIST[len(DONE_INIT_PROCESS_LIST) - 1] == SERVER_IS_UP_MSG:
+                        DONE_INIT_PROCESS_LIST.append(CLIENT_INIT_CONN_KEY_MSG)
+                        print(f'[+] Got the inilization key from the client and it is wrong')
+                        conn.send(KEY_EXCHANGE_FAILED_MSG)
+                        DONE_INIT_PROCESS_LIST.append(KEY_EXCHANGE_FAILED_MSG)
             finally:
-                conn.close()
-                
+                conn.close()      
     except Exception as e:
         print(f"[-] Error: {e}")
     finally:
