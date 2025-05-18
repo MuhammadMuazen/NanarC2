@@ -1,0 +1,21 @@
+digraph "Finite State Machine" {
+	nodesep=4.0 rankdir=D ranksep=2.0
+	S0 [label=Idle]
+	S1 [label=CheckServerStatus]
+	S2 [label=SendInitConnKey]
+	S3 [label=ConnectionTerminated]
+	S4 [label=Heartbeat]
+	S5 [label=GotCommandFromServer]
+	S6 [label=SendResponseToServer]
+	S0 -> S1 [label="Client Run"]
+	S1 -> S2 [label=SERVER_UP]
+	S1 -> S3 [label=SERVER_DOWN]
+	S2 -> S4 [label=KEY_EXCHANGE_SUCCEEDED]
+	S4 -> S4 [label=HB_NO_ACTION]
+	S3 -> S4 [label=HB_CONNECTION_TERMINATED]
+	S4 -> S5 [label=COMMAND_MSG]
+	S5 -> S6 [label=COMMAND_GET_SUCCEEDED]
+	S5 -> S5 [label=COMMAND_GET_FAILED]
+	S6 -> S6 [label=SEND_RESPONSE_FAILED]
+	S6 -> S4 [label=SEND_RESPONSE_SUCCEEDED headport=w tailport=w]
+}
