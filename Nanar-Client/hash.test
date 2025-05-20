@@ -1,0 +1,42 @@
+use nanar_client::*;
+
+use sha2::{Digest, Sha256};
+use base64::prelude::*;
+
+
+fn main() {
+
+    //println!("{}>", fs_functions::get_current_dir());
+    //println!("{}", fs_functions::list_directory_contents(fs_functions::get_current_dir().as_str()))
+
+    /*
+    ///// This is just a test for hasing and encoding the password that will init the connection
+    let secret: &[u8; 16] = b"thisismypassword";
+
+    let mut hasher = Sha256::new();
+    hasher.update(secret);
+
+    let res = hasher.finalize();
+
+    let mut final_pass: String = String::new();
+
+    for i in 0..res.len() {
+        final_pass.push_str(res[i].to_string().as_str());
+
+        if i != res.len() - 1 {
+            final_pass.push(',');
+        }
+    }
+
+
+    let encoded_final_pass: String = BASE64_STANDARD.encode(final_pass.clone());
+
+
+    println!("{:?}", res);
+
+    println!("{:?}", final_pass);
+
+    println!("{}", encoded_final_pass);
+    */
+
+}
