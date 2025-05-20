@@ -5,8 +5,7 @@ import hashlib
 
 # This is just a test for decoding and de-hashing the password that will init the connection
 ######
-base64_string = "MjksMTY5LDE5LDU4LDE4NSwyMTksMjA5LDI5LDQxLDU1LDIzNiwxNDEsNDksNDYsMzAsMzcsMTA1LDEzMywxMTIs \
-ODksMjMxLDYwLDE5OSw0NSwyNDksNDYsMTAzLDksNDAsMTUyLDU4LDE4MQ=="
+
 base64_bytes = base64_string.encode("ascii")
 sample_string_bytes = base64.b64decode(base64_bytes)
 sample_string = sample_string_bytes.decode("ascii")
