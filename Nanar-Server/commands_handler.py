@@ -48,19 +48,21 @@ def execution_args_help_message():
         
     [+] How to use:
 
-    -The server`s shell "turtle" is configured with a few commands that you can make use of:
+    The server`s shell "turtle" is configured with a few commands that you can make use of:
     
-    >help: prints this message.
+    help:          prints this message.
     
-    >list: lists all active connections to the server, each client with it`s ID.
-    
-    >select: supply it with the ID of the client of choice <<use list command to optain the ID>>
-            and you shall have access to the client terminal.
-            >select <ID>
+    list:          lists all active connections to the server, each client with it`s ID.
 
-    >logo: prints the logo.
+    
+    select:        supply it with the ID of the client of choice <<use list command to optain the ID>> and you shall have access
+                   to the client terminal.
+                   >select <ID>
+            
 
-    >exit: shutdown the server.
+    logo:          prints the logo.
+
+    exit:          shutdown the server.
 
 
     [*] Note: you can use the select command to switch to another client while you are accessing one.
