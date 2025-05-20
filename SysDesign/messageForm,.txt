@@ -1,0 +1,16 @@
+Incoming server commands to the client:
+Of course all the messages are cipherd
+
+server_command {
+
+	"client_id": "randomly_generated_string",
+	"command_msg": "command_string_with_args",
+}
+
+client_response {
+	
+	"client_id": "randomly_generated_string",
+	"command_resp_msg": "response_for_the_command_as_string"
+}
+
+//// NOTE --> This is a very early idea subject to change!!!

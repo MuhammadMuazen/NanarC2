@@ -4,7 +4,7 @@ mod fs_helper;
 pub fn get_current_dir() -> String {
     
     let current_path: String = std::env::current_dir()
-        .expect("Failed to get current directory") // Panics if error
+        .expect("Failed to get current directory")
         .to_str().expect("Path is not valid UTF-8").to_string();
 
     current_path
@@ -171,4 +171,8 @@ pub fn move_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
     }
 
     Ok(())
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 2c8d6c5950dcd6b79195e315fccfb0018e0e3597
