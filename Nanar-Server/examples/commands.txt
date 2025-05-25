@@ -63,4 +63,10 @@ This file will have all the avaliable commands that the server can send to the c
       - this command kills a certain process by the provided procese id (<process_id>)
       - if no argumnet is provided it will print a help message to explain how to use the command 
 
- 
+19) terminate [option]
+      - this command will terminate the connection between the client and the server without making the client process stop on the client machine
+      - options:
+                -f: this will make the command terminate the connection and terminate the client process on the client machine
+
+20) 
+
