@@ -102,6 +102,8 @@ def Connection_Handling(s):
             threading.Thread(target=handle_client, args=(conn, addr),daemon=True).start()
         except Exception as e:
             print(f"[-] Connection error: {e}")
+            break
+    s.close()
 
 
 
