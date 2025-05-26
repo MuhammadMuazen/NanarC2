@@ -4,12 +4,11 @@ import sys
 import threading
 import time
 import hashlib
-
+import json
 # =======
 #defining messaging protocol constants:
 CHECK_SERVER_MSG = b'CHECK_SERVER_MSG'
 SERVER_IS_UP_MSG = b'SERVER_IS_UP_MSG'
-SERVER_IS_DOWN_MSG = b'SERVER_IS_DOWN_MSG'
 CLIENT_INIT_CONN_KEY_MSG = b'CLIENT_INIT_CONN_KEY_MSG'
 KEY_EXCHANGE_SUCCEEDED_MSG = b'KEY_EXCHANGE_SUCCEEDED_MSG'
 KEY_EXCHANGE_FAILED_MSG = b'KEY_EXCHANGE_FAILED_MSG'
@@ -32,8 +31,7 @@ server_key_hash = hashlib.sha256(key.encode()).digest()
 
 def sock():
     try:
-        global s
-        print(commands_handler.execution_args_help_message())
+        print(commands_handler.entro())
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(("0.0.0.0", 9999))
@@ -128,7 +126,7 @@ def turtle():
                     listen_event.set()
 
             elif cmd == "help":
-                print(commands_handler.execution_args_help_message())
+                print(commands_handler.help_msg_func())
                 
             elif cmd == "exit":
                 Shutdown_Flag.set()
@@ -162,9 +160,44 @@ def list_connections():
 
 def send_commands(conn, cmd):
     try:
-        conn.send(cmd.encode())
-        client_response = conn.recv(50000).decode()
+        
+        parts = shlex.split(cmd) #Split the command into parts handling quoted arguments.
+        command = parts[0]
+        context = parts[1:] if len(parts) > 1 else []
+
+        payload = {
+            "command": command,
+            "args": context,
+            "flags": []
+        }
+        payload["flags"] = [flag for flag in context if flag.startswith('-')]
+        payload["args"] = [arg for arg in context if not arg.startswith('-')]
+        
+        # Send the JSON payload with length prefix then
+        # convert the length of payload_bytes to a 4-byte binary representation
+        # and then send the length prefix followed by the JSON payload
+        # this is to inform the client of the exact size that he needs to read.
+        
+
+        payload_str = json.dumps(payload)
+        payload_bytes = payload_str.encode()
+        payload_length = len(payload_bytes).to_bytes(4, byteorder='big')
+        
+        conn.send(payload_length + payload_bytes)
+
+        # Receive response with length prefix:
+        response_length_bytes = conn.recv(4)
+        if not response_length_bytes:
+            raise ConnectionError("No response received from client")
+        
+        #convert the length prefix to an integer:
+        response_length = int.from_bytes(response_length_bytes, byteorder='big')
+        
+        # Receive the full response with help of recv_all function:
+        response_data = recv_all(conn, response_length)
+        client_response = response_data.decode()
         print(client_response, end='')
+
     except (ConnectionResetError, BrokenPipeError):
         print("Client disconnected!")
         with conn_lock:
@@ -175,8 +208,20 @@ def send_commands(conn, cmd):
                     current_client = None
                 del connections[index]
                 del addresses[index]
-    except KeyboardInterrupt:
+    except Exception as e:
+        print(f"Error sending command: {e}")
         raise
+
+
+
+def recv_all(conn, expected_length):
+    data = b''
+    while len(data) < expected_length:
+        packet = conn.recv(expected_length - len(data))
+        if not packet:
+            break
+        data += packet
+    return data
 
 
 ### Cleans up all active client connections and closes the server socket:
@@ -188,7 +233,7 @@ def cleanup(sock):
 
 def main():
     s = sock()
-    conn_thread = threading.Thread(target=Connection_Handling, args=(s,))
+    conn_thread = threading.Thread(target=Connection_Handling, args=(s,),daemon=True)
     conn_thread.start()
     try:
         turtle()
