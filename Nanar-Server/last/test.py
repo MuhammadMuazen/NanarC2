@@ -32,8 +32,7 @@ server_key_hash = hashlib.sha256(key.encode()).digest()
 
 def sock():
     try:
-        global s
-        print(commands_handler.execution_args_help_message())
+        print(commands_handler.entro())
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(("0.0.0.0", 9999))
@@ -104,6 +103,8 @@ def Connection_Handling(s):
             threading.Thread(target=handle_client, args=(conn, addr),daemon=True).start()
         except Exception as e:
             print(f"[-] Connection error: {e}")
+            break
+    s.close()
 
 
 
@@ -128,7 +129,7 @@ def turtle():
                     listen_event.set()
 
             elif cmd == "help":
-                print(commands_handler.execution_args_help_message())
+                print(commands_handler.help_msg_func())
                 
             elif cmd == "exit":
                 Shutdown_Flag.set()
@@ -188,7 +189,7 @@ def cleanup(sock):
 
 def main():
     s = sock()
-    conn_thread = threading.Thread(target=Connection_Handling, args=(s,))
+    conn_thread = threading.Thread(target=Connection_Handling, args=(s,),daemon=True)
     conn_thread.start()
     try:
         turtle()
