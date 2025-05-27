@@ -40,8 +40,6 @@ fn main() {
     */
 
 }
-<<<<<<< HEAD
-=======
 
 
 /////////////////////////////////////// reference
@@ -145,4 +143,3 @@ fn communicate_with_server(stream: &mut std::net::TcpStream) -> std::io::Result<
 
     Ok(())
 }
->>>>>>> 2c8d6c5950dcd6b79195e315fccfb0018e0e3597

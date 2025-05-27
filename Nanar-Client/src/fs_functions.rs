@@ -171,8 +171,4 @@ pub fn move_file_dir(source_path_str: &str, destination_path_str: &str) -> std::
     }
 
     Ok(())
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 2c8d6c5950dcd6b79195e315fccfb0018e0e3597

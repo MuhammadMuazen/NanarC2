@@ -1,7 +1,5 @@
 import socket
 
-<<<<<<< HEAD
-=======
 CHECK_SERVER_MSG = b'CHECK_SERVER_MSG'
 SERVER_IS_UP_MSG = b'SERVER_IS_UP_MSG'
 SERVER_IS_DOWN_MSG = b'SERVER_IS_DOWN_MSG'
@@ -13,7 +11,6 @@ KEY_EXCHANGE_FAILED_MSG = b'KEY_EXCHANGE_FAILED_MSG'
 
 DONE_INIT_PROCESS_LIST = []
 
->>>>>>> 2c8d6c5950dcd6b79195e315fccfb0018e0e3597
 if __name__ == "__main__":
     server_sock = None
     try:
@@ -35,12 +32,6 @@ if __name__ == "__main__":
                     if not data:
                         break
                     print(f'data: {data}')
-<<<<<<< HEAD
-                    conn.send(data)
-            finally:
-                conn.close()
-                
-=======
                     
                     if data == CHECK_SERVER_MSG:
                         DONE_INIT_PROCESS_LIST.append(CHECK_SERVER_MSG)
@@ -59,7 +50,6 @@ if __name__ == "__main__":
                         DONE_INIT_PROCESS_LIST.append(KEY_EXCHANGE_FAILED_MSG)
             finally:
                 conn.close()      
->>>>>>> 2c8d6c5950dcd6b79195e315fccfb0018e0e3597
     except Exception as e:
         print(f"[-] Error: {e}")
     finally:
