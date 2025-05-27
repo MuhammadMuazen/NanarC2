@@ -17,8 +17,6 @@ pub fn control_child_processes(suspend_flag: bool) -> windows::core::Result<()>{
         }
     }
 
-    println!("Child PIDs: {:?}", child_pids);
-
     Ok(())
 }
 

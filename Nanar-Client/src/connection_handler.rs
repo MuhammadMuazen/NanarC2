@@ -2,14 +2,10 @@ use std::io::{Read, Write};
 mod connection_helper;
 use super::ps_functions;
 
-const CHECK_SERVER_MSG: &[u8] = "CHECK_SERVER_MSG".as_bytes();
-const SERVER_IS_UP_MSG: &[u8] = "SERVER_IS_UP_MSG".as_bytes();
-const KEY_EXCHANGE_SUCCEEDED_MSG: &[u8] = "KEY_EXCHANGE_SUCCEEDED_MSG".as_bytes();
-const KEY_EXCHANGE_FAILED_MSG: &[u8] = "KEY_EXCHANGE_FAILED_MSG".as_bytes();
-const CLIENT_INIT_CONN_KEY_MSG: &[u8] = "CLIENT_INIT_CONN_KEY_MSG".as_bytes();
-
 // TODO Still in testing (add more connection functions)
 pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pass: &str) -> std::io::Result<()> {
+
+    println!("{}", init_conn_pass);
 
     // Times vars // Make 30000
     let time_before_heartbeat_ms: u64 = 3000;
@@ -33,19 +29,19 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
         
         Err(e) => {
             println!("[!] Error: Connection inilization timeout: {}", e);
-            heartbeat(time_before_heartbeat_ms, "INIT_CONNECTION_FAILED");
+            heartbeat(sock_addr, time_before_heartbeat_ms, "INIT_CONNECTION_FAILED")?;
         },
         Ok(mut stream) => {
 
             stream.set_write_timeout(Some(duration_before_heartbeat))?;
             stream.set_read_timeout(Some(duration_before_heartbeat))?;
             
-            match stream.write(CHECK_SERVER_MSG) {
+            match stream.write(connection_helper::CHECK_SERVER_MSG) {
                 
-                Ok(_) => println!("[+] Sent {:?}", CHECK_SERVER_MSG),
+                Ok(_) => println!("[+] Sent {:?}", connection_helper::CHECK_SERVER_MSG),
                 Err(e) => {
                     println!("[!] Error: Sending connection initilization key failed {}", e);
-                    heartbeat(time_before_heartbeat_ms, "INIT_KEY_SENDING_FAILED");
+                    heartbeat(sock_addr, time_before_heartbeat_ms, "INIT_KEY_SENDING_FAILED")?;
                 }
             }
 
@@ -54,7 +50,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 Ok(data) if data > 0 => {
                     let server_response: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..data]);
                     
-                    if server_response.to_string().as_bytes() == SERVER_IS_UP_MSG {
+                    if server_response.to_string().as_bytes() == connection_helper::SERVER_IS_UP_MSG {
                         
                         println!("Server Is UP {:?}", server_response)
                     }
@@ -64,11 +60,11 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 },
                 Err(e) => {
                     eprintln!("Read failed: {}", e);
-                    heartbeat(time_before_heartbeat_ms, "FAILED_READ_DATA_FROM_SERVER");
+                    heartbeat(sock_addr, time_before_heartbeat_ms, "FAILED_READ_DATA_FROM_SERVER")?;
                 }
             }
             
-            match stream.write(CLIENT_INIT_CONN_KEY_MSG) {
+            match stream.write(connection_helper::CLIENT_INIT_CONN_KEY_MSG) {
 
                 Ok(_) => {
                     println!("[+] Send initlization key to the server")
@@ -76,7 +72,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 Err(e) => {
 
                     println!("[!] Error sending the key {}", e);
-                    heartbeat(time_before_heartbeat_ms, "COULD_NOT_SEND_KEY");
+                    heartbeat(sock_addr, time_before_heartbeat_ms, "COULD_NOT_SEND_KEY")?;
                 }
             }
 
@@ -85,15 +81,15 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 Ok(data) if data > 0 => {
                     let server_response: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..data]);
                     println!("{}", server_response);
-                    if server_response.to_string().as_bytes() == KEY_EXCHANGE_SUCCEEDED_MSG {
+                    if server_response.to_string().as_bytes() == connection_helper::KEY_EXCHANGE_SUCCEEDED_MSG {
                         
                         println!("[+] Key exchange sucess!");
-                        heartbeat(time_before_heartbeat_ms, "CONNECTION_SUCCEEDED");
+                        heartbeat(sock_addr, time_before_heartbeat_ms, "CONNECTION_SUCCEEDED")?;
                     }
-                    else if server_response.to_string().as_bytes() == KEY_EXCHANGE_FAILED_MSG {
+                    else if server_response.to_string().as_bytes() == connection_helper::KEY_EXCHANGE_FAILED_MSG {
 
                         println!("[!] Key exchange failed becuase it was wrong! {}", server_response);
-                        heartbeat(time_before_heartbeat_ms, "WRONG_KEY");
+                        heartbeat(sock_addr, time_before_heartbeat_ms, "WRONG_KEY")?;
                     }
                 },
                 Ok(_) => {
@@ -102,7 +98,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 Err(e) => {
                     
                     eprintln!("[!] Error: key exchage failed: {}", e);
-                    heartbeat(time_before_heartbeat_ms, "KEY_EXCHANGE_FAILED_MSG");
+                    heartbeat(sock_addr, time_before_heartbeat_ms, "KEY_EXCHANGE_FAILED_MSG")?;
                 }
             }
             
@@ -114,17 +110,37 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
     Ok(())
 }
 
-pub fn heartbeat(time_before_heartbeat_ms: u64, reason: &str) -> std::io::Result<()>{
+pub fn heartbeat(sock_addr: std::net::SocketAddr, time_before_heartbeat_ms: u64, call_reason: &str) -> std::io::Result<()>{
 
-    println!("WHAT");
+    println!("[+] Enter Heartbeat!!");
+
+    println!("{}", time_before_heartbeat_ms);
+
+    let suspend_flag: bool = false;
+    
+    // This is just for simplicity that's why there is many other options for the call_reason in other locations
+    // Maybe later I will update it to be able to reconnect with the server from the point it missed the connection
+    match call_reason {
+        connection_helper::HEARTBEAT_NO_ACTION => connection_helper::HEARTBEAT_NO_ACTION,
+        _ => connection_helper::MISCONNECTION_OR_COMMUNICATION
+    };
 
 
     // Make 60000
-    let mut hearbeat_message_timer_ms: u64 = 60000;
+    let hearbeat_message_timer_ms: u64 = 3000;
     let heartbeat_message_duration: std::time::Duration = std::time::Duration::from_millis(hearbeat_message_timer_ms);
     
-    if reason == "INIT_CONNECTION_FAILED" {
-        ps_functions::control_child_processes(true)?;
+    if call_reason != connection_helper::HEARTBEAT_NO_ACTION {
+        // 1) Suspend all the child processes
+        ps_functions::control_child_processes(suspend_flag)?;
+        // 2) Initiate the heartbeat connection with the call reason MISCONNECTION_OR_COMMUNICATION
+        connection_helper::hearbeat_connection(sock_addr, heartbeat_message_duration, call_reason);
+    
+    } else if call_reason == connection_helper::HEARTBEAT_NO_ACTION {
+        // 1) Don't stop all the child processes
+        // 2) Initiate the heartbeat connection with the call reason HEARTBEAT_NO_ACTION
+        connection_helper::hearbeat_connection(sock_addr, heartbeat_message_duration, call_reason);
+        // 3) 
     }
 
     Ok(())
