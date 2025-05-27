@@ -12,8 +12,8 @@ const KEY_EXCHANGE_FAILED_MSG: &[u8] = "KEY_EXCHANGE_FAILED_MSG".as_bytes();
 pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pass: &str) -> std::io::Result<()> {
 
     // Times vars
-    let time_before_heartbeat: u16 = 3000;
-    let duration_before_heartbeat: std::time::Duration = std::time::Duration::from_millis(time_before_heartbeat.into());
+    let time_before_heartbeat: u64 = 3000;
+    let duration_before_heartbeat: std::time::Duration = std::time::Duration::from_millis(time_before_heartbeat);
 
     // Server ip and port
     let server_ip_u8: [u8; 4] = connection_helper::ip_to_u8_array(server_addr).unwrap();
@@ -112,7 +112,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
     Ok(())
 }
 
-pub fn heartbeat(time_sec: u16, reason: &str) {
+pub fn heartbeat(time_sec: u64, reason: &str) {
 
 
 }
