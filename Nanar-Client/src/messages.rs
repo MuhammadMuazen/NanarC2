@@ -1,0 +1,15 @@
+// Messages
+pub const CHECK_SERVER_MSG: &[u8] = "CHECK_SERVER_MSG".as_bytes();
+pub const SERVER_IS_UP_MSG: &[u8] = "SERVER_IS_UP_MSG".as_bytes();
+pub const KEY_EXCHANGE_SUCCEEDED_MSG: &[u8] = "KEY_EXCHANGE_SUCCEEDED_MSG".as_bytes();
+pub const KEY_EXCHANGE_FAILED_MSG: &[u8] = "KEY_EXCHANGE_FAILED_MSG".as_bytes();
+pub const CLIENT_INIT_CONN_KEY_MSG: &[u8] = "CLIENT_INIT_CONN_KEY_MSG".as_bytes();
+pub const HEARTBEAT_RETRY_CONNECTION_MSG: &[u8] = "HEARTBEAT_RETRY_INIT_CONNECTION_MSG".as_bytes();
+pub const HEARTBEAT_SUCCESS_RESPONSE_MSG: &[u8] = "HEARTBEAT_SUCCESS_RESPONSE_MSG".as_bytes();
+pub const HEARTBEAT_NO_ACTION_MSG: &[u8] = "HEARTBEAT_NO_ACTION_MSG".as_bytes();
+pub const HEARTBEAT_NO_ACTION_RESPONSE_MSG: &[u8] = "HEARTBEAT_NO_ACTION_RESPONSE_MSG".as_bytes();
+pub const COMMAND_MSG: &[u8] = "COMMAND_MSG:".as_bytes();
+
+// Reasons to call the heartbeat function
+pub const MISCONNECTION_OR_COMMUNICATION: &str = "MICSONNECTION_OR_COMMUNICATION";
+pub const HEARTBEAT_NO_ACTION: &str = "HEARTBEAT_NO_ACTION";
