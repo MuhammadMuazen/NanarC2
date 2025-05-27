@@ -52,3 +52,4 @@ pub fn is_executable(entry: &std::fs::DirEntry) -> bool {
         }
     }
 }
+

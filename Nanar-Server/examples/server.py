@@ -42,11 +42,13 @@ if __name__ == "__main__":
                         DONE_INIT_PROCESS_LIST.append(CLIENT_INIT_CONN_KEY_MSG)
                         print(f'[+] Got the inilization key from the client')
                         conn.send(KEY_EXCHANGE_SUCCEEDED_MSG)
+                        print("[+] Sent the KEY_EXCHANGE_SUCCEEDED_MSG")
                         DONE_INIT_PROCESS_LIST.append(KEY_EXCHANGE_SUCCEEDED_MSG)
                     elif data != CLIENT_INIT_CONN_KEY_MSG and DONE_INIT_PROCESS_LIST[len(DONE_INIT_PROCESS_LIST) - 1] == SERVER_IS_UP_MSG:
                         DONE_INIT_PROCESS_LIST.append(CLIENT_INIT_CONN_KEY_MSG)
-                        print(f'[+] Got the inilization key from the client and it is wrong')
+                        print(f'[+] Got the inilization key from the client and it is wrong: {data}')
                         conn.send(KEY_EXCHANGE_FAILED_MSG)
+                        print("[+] Send the KEY_EXCHANGE_FAILED_MSG")
                         DONE_INIT_PROCESS_LIST.append(KEY_EXCHANGE_FAILED_MSG)
             finally:
                 conn.close()      

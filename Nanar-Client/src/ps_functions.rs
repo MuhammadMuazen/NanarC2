@@ -1,8 +1,32 @@
+mod ps_helper;
+
+pub fn control_child_processes(suspend_flag: bool) -> windows::core::Result<()>{
+
+    let current_pid: u32 = std::process::id();
+    let child_pids: Vec<u32> = ps_helper::get_child_processes(current_pid)?;
+
+    if suspend_flag == true {
+        // Suspend all children
+        for pid in &child_pids {
+        ps_helper::suspend_process(*pid)?;
+        }
+    } else if suspend_flag == false {
+        // Resume all children
+        for pid in &child_pids {
+            ps_helper::resume_process(*pid)?;
+        }
+    }
+
+    println!("Child PIDs: {:?}", child_pids);
+
+    Ok(())
+}
+
 pub fn run_exec(exec_file_name: &str, args: &str) {
 
     std::process::Command::new(exec_file_name)
     .args(&[args])
-    .status()
+    .spawn()
     .expect(format!("[-] Process Creation Error: {}", std::io::Error::last_os_error()).as_str());
 }
 

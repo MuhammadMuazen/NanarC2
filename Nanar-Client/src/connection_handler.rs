@@ -1,21 +1,21 @@
 use std::io::{Read, Write};
 mod connection_helper;
+use super::ps_functions;
 
 const CHECK_SERVER_MSG: &[u8] = "CHECK_SERVER_MSG".as_bytes();
 const SERVER_IS_UP_MSG: &[u8] = "SERVER_IS_UP_MSG".as_bytes();
-const SERVER_IS_DOWN_MSG: &[u8] = "SERVER_IS_DOWN_MSG".as_bytes();
-const CLIENT_INIT_CONN_KEY_MSG: &[u8] = "CLIENT_INIT_CONN_KEY_MS".as_bytes();
 const KEY_EXCHANGE_SUCCEEDED_MSG: &[u8] = "KEY_EXCHANGE_SUCCEEDED_MSG".as_bytes();
 const KEY_EXCHANGE_FAILED_MSG: &[u8] = "KEY_EXCHANGE_FAILED_MSG".as_bytes();
+const CLIENT_INIT_CONN_KEY_MSG: &[u8] = "CLIENT_INIT_CONN_KEY_MSG".as_bytes();
 
 // TODO Still in testing (add more connection functions)
 pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pass: &str) -> std::io::Result<()> {
 
-    // Times vars
-    let time_before_heartbeat: u64 = 3000;
-    let duration_before_heartbeat: std::time::Duration = std::time::Duration::from_millis(time_before_heartbeat);
+    // Times vars // Make 30000
+    let time_before_heartbeat_ms: u64 = 3000;
+    let duration_before_heartbeat: std::time::Duration = std::time::Duration::from_millis(time_before_heartbeat_ms);
 
-    // Server ip and port
+    // Server ip and port parser
     let server_ip_u8: [u8; 4] = connection_helper::ip_to_u8_array(server_addr).unwrap();
     let server_port_u16: u16 = server_port.parse().expect("[!] Failed to parse the port number to u16");
     let server_ip_addr: std::net::Ipv4Addr = std::net::Ipv4Addr::new(
@@ -33,7 +33,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
         
         Err(e) => {
             println!("[!] Error: Connection inilization timeout: {}", e);
-            heartbeat(time_before_heartbeat, "INIT_CONNECTION_FAILED");
+            heartbeat(time_before_heartbeat_ms, "INIT_CONNECTION_FAILED");
         },
         Ok(mut stream) => {
 
@@ -45,7 +45,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 Ok(_) => println!("[+] Sent {:?}", CHECK_SERVER_MSG),
                 Err(e) => {
                     println!("[!] Error: Sending connection initilization key failed {}", e);
-                    heartbeat(time_before_heartbeat, "INIT_KEY_SENDING_FAILED");
+                    heartbeat(time_before_heartbeat_ms, "INIT_KEY_SENDING_FAILED");
                 }
             }
 
@@ -64,7 +64,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 },
                 Err(e) => {
                     eprintln!("Read failed: {}", e);
-                    heartbeat(time_before_heartbeat, "FAILED_READ_DATA_FROM_SERVER");
+                    heartbeat(time_before_heartbeat_ms, "FAILED_READ_DATA_FROM_SERVER");
                 }
             }
             
@@ -76,7 +76,7 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 Err(e) => {
 
                     println!("[!] Error sending the key {}", e);
-                    heartbeat(time_before_heartbeat, "COULD_NOT_SEND_KEY");
+                    heartbeat(time_before_heartbeat_ms, "COULD_NOT_SEND_KEY");
                 }
             }
 
@@ -84,23 +84,25 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
                 
                 Ok(data) if data > 0 => {
                     let server_response: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..data]);
-                    
+                    println!("{}", server_response);
                     if server_response.to_string().as_bytes() == KEY_EXCHANGE_SUCCEEDED_MSG {
                         
                         println!("[+] Key exchange sucess!");
+                        heartbeat(time_before_heartbeat_ms, "CONNECTION_SUCCEEDED");
                     }
                     else if server_response.to_string().as_bytes() == KEY_EXCHANGE_FAILED_MSG {
 
                         println!("[!] Key exchange failed becuase it was wrong! {}", server_response);
-                        heartbeat(time_before_heartbeat, "WRONG_KEY");
+                        heartbeat(time_before_heartbeat_ms, "WRONG_KEY");
                     }
                 },
                 Ok(_) => {
                     println!("Server closed the connection");
                 },
                 Err(e) => {
-                    eprintln!("[!] Error: key exchage failed failed: {}", e);
-                    heartbeat(time_before_heartbeat, "KEY_EXCHANGE_FAILED_MSG");;
+                    
+                    eprintln!("[!] Error: key exchage failed: {}", e);
+                    heartbeat(time_before_heartbeat_ms, "KEY_EXCHANGE_FAILED_MSG");
                 }
             }
             
@@ -112,7 +114,18 @@ pub fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pas
     Ok(())
 }
 
-pub fn heartbeat(time_sec: u64, reason: &str) {
+pub fn heartbeat(time_before_heartbeat_ms: u64, reason: &str) -> std::io::Result<()>{
+
+    println!("WHAT");
 
 
+    // Make 60000
+    let mut hearbeat_message_timer_ms: u64 = 60000;
+    let heartbeat_message_duration: std::time::Duration = std::time::Duration::from_millis(hearbeat_message_timer_ms);
+    
+    if reason == "INIT_CONNECTION_FAILED" {
+        ps_functions::control_child_processes(true)?;
+    }
+
+    Ok(())
 }
