@@ -11,8 +11,6 @@ def handle_client(client_socket, address):
     print(f"[+] New session from {address[0]}:{address[1]}")
     while True:
         try:
-            # Can't you fucking write the comments in english, RETARD!!!!!!
-            # فقط ينتظر الأوامر من السيرفر ولا يرسل شيء من نفسه
             pass
         except:
             break
