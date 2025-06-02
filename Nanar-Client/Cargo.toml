@@ -3,6 +3,7 @@ name = "nanar_client"
 version = "0.1.0"
 edition = "2024"
 #[target.'cfg(windows)'.windows_subsystem]
+#windows = true  # Disables the console
 
 [dependencies]
 chrono = "0.4.41"
