@@ -356,9 +356,9 @@ dependencies = [
 
 [[package]]
 name = "tasklist"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09bd0d39df848657de720ed8e7052e6a3852f1970de1a1b0188c2ca741db726a"
+checksum = "84d3576491c24f79088db107f65f8f3bcf544f60ae9d33a4760a3a15418d0852"
 dependencies = [
  "windows",
  "windows-core",
