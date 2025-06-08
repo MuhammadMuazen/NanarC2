@@ -1,3 +1,9 @@
+/*
+    This file holds all the messages that are going to be exchagned between
+    the server and the client and the messages for the error in the connection.
+*/
+
+
 // Messages
 pub const CHECK_SERVER_MSG: &[u8] = "CHECK_SERVER_MSG".as_bytes();
 pub const SERVER_IS_UP_MSG: &[u8] = "SERVER_IS_UP_MSG".as_bytes();

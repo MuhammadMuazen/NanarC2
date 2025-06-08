@@ -1,7 +1,14 @@
+/*
+    This file holds the connection functions:
+    1) The connection initilization function
+    2) The heartbeat function
+*/
+
 use super::{ps_functions, messages};
 use std::io::{Read, Write};
 mod connection_helper;
 
+// This is only here beacause I need to call it in the main function
 pub fn convert_ip_port_to_sockaddr(server_addr: &str, server_port: &str) -> std::net::SocketAddr {
 
     // Server ip and port parser
@@ -17,7 +24,8 @@ pub fn convert_ip_port_to_sockaddr(server_addr: &str, server_port: &str) -> std:
     sock_addr
 }
 
-// TODO Still in testing (add more connection functions)
+
+// Connection initilization function
 pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_conn_pass: &str) -> std::io::Result<()> {
 
     println!("{}", init_conn_pass);
@@ -117,6 +125,7 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
     Ok(())
 }
 
+// Heartbeat logic function
 pub async fn heartbeat(sock_addr: std::net::SocketAddr, call_reason: &str) -> std::io::Result<()>{
 
     println!("[+] Enter Heartbeat!!");
