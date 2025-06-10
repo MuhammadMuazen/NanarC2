@@ -40,8 +40,9 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
     // Temp Buffer (TODO Change later)
     let mut buffer: [u8; 1024]   = [0; 1024];
 
+    // Create the first init connnection
     match std::net::TcpStream::connect_timeout(&sock_addr, duration_before_heartbeat) {
-        
+    
         Err(e) => {
             println!("[!] Error: Connection inilization timeout: {}", e);
             heartbeat(sock_addr, "INIT_CONNECTION_FAILED").await?;
@@ -51,6 +52,7 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
             stream.set_write_timeout(Some(duration_before_heartbeat))?;
             stream.set_read_timeout(Some(duration_before_heartbeat))?;
             
+            // Check if the server is up
             match stream.write(messages::CHECK_SERVER_MSG) {
                 
                 Ok(_) => println!("[+] Sent {:?}", messages::CHECK_SERVER_MSG),
@@ -60,6 +62,7 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
                 }
             }
 
+            // Read the server response for the checking if the server is up
             match stream.read(&mut buffer) {
                 
                 Ok(data) if data > 0 => {
@@ -79,6 +82,7 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
                 }
             }
             
+            // Send the initlization connection key
             match stream.write(messages::CLIENT_INIT_CONN_KEY_MSG) {
 
                 Ok(_) => {
@@ -91,6 +95,7 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
                 }
             }
 
+            // Check the response of the server for the sending of the connection initilization key
             match stream.read(&mut buffer) {
                 
                 Ok(data) if data > 0 => {
