@@ -167,5 +167,6 @@ pub async fn heartbeat(sock_addr: std::net::SocketAddr, call_reason: &str) -> st
 
 pub async fn commands_communication_handler(server_addr: &str, server_port: &str, commands_secret: &str) {
 
-
+    // TDOD
+    println!("THis is command handler");
 }

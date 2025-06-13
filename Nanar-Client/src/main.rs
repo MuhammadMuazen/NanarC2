@@ -1,4 +1,4 @@
-use nanar_client::*;
+use nanar_client::{connection_handler::heartbeat, *};
 
 #[tokio::main]
 async fn main() {
@@ -6,6 +6,7 @@ async fn main() {
     // Connection vars
     const SERVER_ADDR: &str = "127.0.0.1";
     const SERVER_PORT: &str = "9999";
+    // Change this for the generated ID:Hash from the server
     const INIT_CONNECTION_PASS: &str = "WHAT";
 
     loop {
@@ -29,12 +30,23 @@ async fn main() {
                 let commands_listener_task: tokio::task::JoinHandle<()> = tokio::spawn(
                     connection_handler::commands_communication_handler(SERVER_ADDR, SERVER_PORT, INIT_CONNECTION_PASS));
                 
+                // Start two tasks the first one is the heartbeat and the second one is the one listening for commands
                 let _ = tokio::join!(heartbeat_task, commands_listener_task);
             },
             Err(e) => {
 
                 println!("[-] Could not initilize the connection from the main: {}", e);
                 println!("[+] Now the server will go into the heartbeat state");
+
+                let heartbeat_status: Result<(), std::io::Error> = heartbeat(
+                    connection_handler::convert_ip_port_to_sockaddr(SERVER_ADDR, SERVER_PORT),
+                     messages::MISCONNECTION_OR_COMMUNICATION).await;
+
+                if heartbeat_status.is_err() {
+
+                    println!("[!] Something went wrong with the hearbeat message!");
+                    break;
+                }
             }
         }
     }
