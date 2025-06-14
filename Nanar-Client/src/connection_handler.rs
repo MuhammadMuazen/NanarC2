@@ -44,6 +44,7 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
     match std::net::TcpStream::connect_timeout(&sock_addr, duration_before_heartbeat) {
     
         Err(e) => {
+
             println!("[!] Error: Connection inilization timeout: {}", e);
             heartbeat(sock_addr, "INIT_CONNECTION_FAILED").await?;
         },
@@ -165,7 +166,27 @@ pub async fn heartbeat(sock_addr: std::net::SocketAddr, call_reason: &str) -> st
     Ok(())
 }
 
-pub async fn commands_communication_handler(server_addr: &str, server_port: &str, commands_secret: &str) {
+pub async fn commands_communication_handler(server_addr: &str, server_port: &str, commands_secret: &str, nonce: &str) {
+
+    let sock_address: std::net::SocketAddr = convert_ip_port_to_sockaddr(server_addr, server_port);
+
+    println!("{}", sock_address);
+
+    let key: &[u8] = commands_secret.as_bytes();
+    let nonce: &[u8] = nonce.as_bytes();
+    let plaintext: &'static [u8; 12] = b"Hello world!";
+
+    // Example using GCM mode
+    let (gcm_ciphertext, nonce) = connection_helper::aes_gcm_encrypt(key, nonce, plaintext);
+    
+    println!("=== Encryption Results ===");
+    println!("Nonce (hex): {}", hex::encode(&nonce));
+    println!("Ciphertext (hex): {}", hex::encode(&gcm_ciphertext));
+
+    let gcm_decrypted: Vec<u8> = connection_helper::aes_gcm_decrypt(key, &nonce, &gcm_ciphertext);
+    
+    println!("GCM Decrypted: {}", String::from_utf8_lossy(&gcm_decrypted));
+
 
     // TDOD
     println!("THis is command handler");

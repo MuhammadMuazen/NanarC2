@@ -1,5 +1,50 @@
 use std::io::{Read, Write};
 use crate::messages;
+use aes_gcm::{
+    aead::{Aead, generic_array::GenericArray}, 
+    Aes256Gcm, 
+    KeyInit
+};
+
+// Encryption function for the commmand communication
+pub fn aes_gcm_encrypt(key: &[u8], nonce: &[u8], plaintext: &[u8]) -> (Vec<u8>, Vec<u8>) {
+    
+    let key: &GenericArray<u8, _> = GenericArray::from_slice(key);
+    
+    let cipher: aes_gcm::AesGcm<aes_gcm::aes::Aes256, 
+        aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<
+        aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UTerm, 
+        aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B0>, 
+        aes_gcm::aead::consts::B0>> = Aes256Gcm::new(key);
+    
+    let nonce: &GenericArray<u8, aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<
+        aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UTerm, 
+        aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B0>, 
+        aes_gcm::aead::consts::B0>> = GenericArray::from_slice(nonce);
+    
+    let ciphertext: Vec<u8> = cipher.encrypt(&nonce, plaintext).unwrap();
+    
+    (ciphertext, nonce.to_vec())
+}
+
+// Decryption function for the commmand communication
+pub fn aes_gcm_decrypt(key: &[u8], nonce: &[u8], ciphertext: &[u8]) -> Vec<u8> {
+    
+    let key: &GenericArray<u8, _> = GenericArray::from_slice(key);
+    
+    let nonce: &GenericArray<u8, aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<
+        aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UTerm, 
+        aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B0>, 
+        aes_gcm::aead::consts::B0>> = GenericArray::from_slice(nonce);
+    
+    let cipher: aes_gcm::AesGcm<aes_gcm::aes::Aes256, aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<
+        aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UInt<aes_gcm::aes::cipher::typenum::UTerm, 
+        aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B1>, aes_gcm::aead::consts::B0>, 
+        aes_gcm::aead::consts::B0>> = Aes256Gcm::new(key);
+    
+    cipher.decrypt(&nonce, ciphertext).unwrap()
+}
+
 
 pub fn ip_to_u8_array(ip_str: &str) -> Option<[u8; 4]> {
     
