@@ -166,10 +166,12 @@ pub async fn heartbeat(sock_addr: std::net::SocketAddr, call_reason: &str) -> st
     Ok(())
 }
 
+// This is the function that will handle the commands sending and receiving communication
 pub async fn commands_communication_handler(server_addr: &str, server_port: &str, commands_secret: &str, nonce: &str) {
 
     let sock_address: std::net::SocketAddr = convert_ip_port_to_sockaddr(server_addr, server_port);
 
+    /*
     println!("{}", sock_address);
 
     let key: &[u8] = commands_secret.as_bytes();
@@ -190,4 +192,5 @@ pub async fn commands_communication_handler(server_addr: &str, server_port: &str
 
     // TDOD
     println!("THis is command handler");
+    */
 }

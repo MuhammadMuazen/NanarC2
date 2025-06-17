@@ -31,7 +31,8 @@ async fn main() {
                 );
                     
                 let commands_listener_task: tokio::task::JoinHandle<()> = tokio::spawn(
-                    connection_handler::commands_communication_handler(SERVER_ADDR, SERVER_PORT, COMMANMD_COMMUNICATION_SECRET, NONCE));
+                    connection_handler::commands_communication_handler(SERVER_ADDR, SERVER_PORT,
+                         COMMANMD_COMMUNICATION_SECRET, NONCE));
                 
                 // Start two tasks the first one is the heartbeat and the second one is the one listening for commands
                 let _ = tokio::join!(heartbeat_task, commands_listener_task);
