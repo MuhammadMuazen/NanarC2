@@ -45,7 +45,7 @@ pub fn aes_gcm_decrypt(key: &[u8], nonce: &[u8], ciphertext: &[u8]) -> Vec<u8> {
     cipher.decrypt(&nonce, ciphertext).unwrap()
 }
 
-
+// Convert ip string to u8 array of 4 elements to be used in sock addr
 pub fn ip_to_u8_array(ip_str: &str) -> Option<[u8; 4]> {
     
     let (a, rest) = ip_str.split_once('.')?;
@@ -60,6 +60,7 @@ pub fn ip_to_u8_array(ip_str: &str) -> Option<[u8; 4]> {
     ])
 }
 
+// This function is used to managed the connection of the heartbeat
 pub fn hearbeat_connection(sock_addr: std::net::SocketAddr, heartbeat_message_duration: std::time::Duration, call_reason: &str) {
 
     // Buffer to store the server messages in
