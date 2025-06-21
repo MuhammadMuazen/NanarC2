@@ -77,7 +77,7 @@ pub fn hearbeat_connection(sock_addr: std::net::SocketAddr, heartbeat_message_du
                 println!("[!] Entering heartbeat message communication status!");
 
                 // If called beacuse of failing in the connection or the communication
-                if call_reason == messages::MISCONNECTION_OR_COMMUNICATION {
+                if call_reason == messages::MISCONNECTION_OR_MISCOMMUNICATION {
 
                     // Now init the heartbeat connection
                     match stream.write(messages::HEARTBEAT_RETRY_CONNECTION_MSG) {

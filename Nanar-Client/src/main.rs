@@ -30,7 +30,7 @@ async fn main() {
                         messages::HEARTBEAT_NO_ACTION)
                 );
                     
-                let commands_listener_task: tokio::task::JoinHandle<()> = tokio::spawn(
+                let commands_listener_task: tokio::task::JoinHandle<Result<(), std::io::Error>> = tokio::spawn(
                     connection_handler::commands_communication_handler(SERVER_ADDR, SERVER_PORT,
                          COMMANMD_COMMUNICATION_SECRET, NONCE));
                 
@@ -44,7 +44,7 @@ async fn main() {
 
                 let heartbeat_status: Result<(), std::io::Error> = heartbeat(
                     connection_handler::convert_ip_port_to_sockaddr(SERVER_ADDR, SERVER_PORT),
-                     messages::MISCONNECTION_OR_COMMUNICATION).await;
+                     messages::MISCONNECTION_OR_MISCOMMUNICATION).await;
 
                 if heartbeat_status.is_err() {
 

