@@ -9,7 +9,7 @@ KEY_EXCHANGE_SUCCEEDED_MSG = b'KEY_EXCHANGE_SUCCEEDED_MSG'
 KEY_EXCHANGE_FAILED_MSG = b'KEY_EXCHANGE_FAILED_MSG'
 
 # Client configuration
-SERVER_IP = "127.0.0.1"  # Server's IP address
+SERVER_IP = "192.168.225.117"  # Server's IP address
 SERVER_PORT = 9999        # Server's port
 CLIENT_KEY = "password"   # Must match the server's 'key' variable
 

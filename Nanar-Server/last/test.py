@@ -13,18 +13,35 @@ CLIENT_INIT_CONN_KEY_MSG = b'CLIENT_INIT_CONN_KEY_MSG'
 KEY_EXCHANGE_SUCCEEDED_MSG = b'KEY_EXCHANGE_SUCCEEDED_MSG'
 KEY_EXCHANGE_FAILED_MSG = b'KEY_EXCHANGE_FAILED_MSG'
 
-client_states = {}  # Dictionary to track handshake progress per client
+
+# like [b'CHECK_SERVER_MSG', b'SERVER_IS_UP_MSG']
+# to sortage connection level
+client_states = {}  
 
 
-#global variables
+# handle for socket  => like [<socket.socket fd=7>, <socket.socket fd=8>]
 connections = []
+
+# sortage address => like  [('192.168.1.10', 50322), ('192.168.1.11', 50325)]
 addresses = []
+
+# to shutdown the threads client
 Shutdown_Flag = threading.Event()
+
+# if the server press listen ... listen is start 
 listen_event = threading.Event()
+
+# sortage the client address =>  like current_client = ('192.168.1.10', 50322)
 global current_client
 current_client = None
+
+# to lock the liste addresses (if thread "A" write it .. another thread "B" can not write it )
 conn_lock = threading.Lock()
+
+#Authorization key
 key = "password"
+
+# 4 Byte hash like => server_key_hash = b'\xa5\x89\xdf...\x91
 server_key_hash = hashlib.sha256(key.encode()).digest()  
 
 
@@ -33,6 +50,7 @@ def sock():
     try:
         print(commands_handler.entro())
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # release port now when the thread is stoped
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(("0.0.0.0", 9999))
         return s
@@ -162,27 +180,34 @@ def list_connections():
 
 def send_commands(conn, cmd):
     try:
-        
-        parts = shlex.split(cmd) #Split the command into parts handling quoted arguments.
-        command = parts[0]
-        context = parts[1:] if len(parts) > 1 else []
+        # command = ls -la /home
+        # parts = [ "ls" , "-la" , "/home" ]
+        parts = shlex.split(cmd)
 
+        command = parts[0] # ls
+        context = parts[1:] if len(parts) > 1 else [] # context = ["-la" , "/home"]
+
+        
         payload = {
             "command": command,
             "args": context,
             "flags": []
         }
+        # payload = {"command" : "ls" , "args : ["/home"]" , flags : ["-la"] }
+
         payload["flags"] = [flag for flag in context if flag.startswith('-')]
         payload["args"] = [arg for arg in context if not arg.startswith('-')]
         
-        # Send the JSON payload with length prefix then
-        # convert the length of payload_bytes to a 4-byte binary representation
-        # and then send the length prefix followed by the JSON payload
-        # this is to inform the client of the exact size that he needs to read.
+      
         
-
+        
+        # convert the length of payload_bytes to a 4-byte binary representation
         payload_str = json.dumps(payload)
+
+        # and then send the length prefix followed by the JSON payload
         payload_bytes = payload_str.encode()
+
+        # this is to inform the client of the exact size that he needs to read.
         payload_length = len(payload_bytes).to_bytes(4, byteorder='big')
         
         conn.send(payload_length + payload_bytes)
