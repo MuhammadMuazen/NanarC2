@@ -5,8 +5,6 @@ import threading
 import time
 import hashlib
 import json
-import secrets
-import string
 # =======
 #defining messaging protocol constants:
 CHECK_SERVER_MSG = b'CHECK_SERVER_MSG'
@@ -14,36 +12,24 @@ SERVER_IS_UP_MSG = b'SERVER_IS_UP_MSG'
 CLIENT_INIT_CONN_KEY_MSG = b'CLIENT_INIT_CONN_KEY_MSG'
 KEY_EXCHANGE_SUCCEEDED_MSG = b'KEY_EXCHANGE_SUCCEEDED_MSG'
 KEY_EXCHANGE_FAILED_MSG = b'KEY_EXCHANGE_FAILED_MSG'
+#--
+HEARTBEAT_RETRY_CONNECTION_MSG = b'HEARTBEAT_RETRY_INIT_CONNECTION_MSG'
+HEARTBEAT_SUCCESS_RESPONSE_MSG = b'HEARTBEAT_SUCCESS_RESPONSE_MSG'
+HEARTBEAT_NO_ACTION_MSG = b'HEARTBEAT_NO_ACTION_MSG'
+HEARTBEAT_NO_ACTION_RESPONSE_MSG = b'HEARTBEAT_NO_ACTION_RESPONSE_MSG'
+
+client_states = {}  # Dictionary to track handshake progress per client
 
 
-# like [b'CHECK_SERVER_MSG', b'SERVER_IS_UP_MSG']
-# to sortage connection level
-client_states = {}  
-
-
-# handle for socket  => like [<socket.socket fd=7>, <socket.socket fd=8>]
+#global variables
 connections = []
-
-# sortage address => like  [('192.168.1.10', 50322), ('192.168.1.11', 50325)]
 addresses = []
-
-# to shutdown the threads client
 Shutdown_Flag = threading.Event()
-
-# if the server press listen ... listen is start 
 listen_event = threading.Event()
-
-# sortage the client address =>  like current_client = ('192.168.1.10', 50322)
 global current_client
 current_client = None
-
-# to lock the liste addresses (if thread "A" write it .. another thread "B" can not write it )
 conn_lock = threading.Lock()
-
-#Authorization key
-key = "password"
-
-# 4 Byte hash like => server_key_hash = b'\xa5\x89\xdf...\x91
+key = "WHAT"
 server_key_hash = hashlib.sha256(key.encode()).digest()  
 
 
@@ -52,7 +38,6 @@ def sock():
     try:
         print(commands_handler.entro())
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # release port now when the thread is stoped
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(("0.0.0.0", 9999))
         return s
@@ -74,7 +59,7 @@ def handle_client(conn ,addr):
                 break
 
             current_step = client_states[conn][-1] if client_states[conn] else None
-
+            
             ###implementing messaging dynamic:
             if data == CHECK_SERVER_MSG:
                 client_states[conn].append(CHECK_SERVER_MSG)
@@ -99,6 +84,20 @@ def handle_client(conn ,addr):
                     conn.close()
                     break
 
+            elif data == HEARTBEAT_NO_ACTION_MSG:
+                client_states[conn].append(HEARTBEAT_NO_ACTION_MSG)
+                conn.send(HEARTBEAT_NO_ACTION_RESPONSE_MSG)
+                client_states[conn].append(HEARTBEAT_NO_ACTION_RESPONSE_MSG)
+                print(f"{addr} heartbeat check (no action)")
+
+            elif data == HEARTBEAT_RETRY_CONNECTION_MSG:
+                client_states[conn].append(HEARTBEAT_SUCCESS_RESPONSE_MSG)
+                client_states[conn].append(SERVER_IS_UP_MSG)
+                conn.send(HEARTBEAT_SUCCESS_RESPONSE_MSG)
+                conn.send(SERVER_IS_UP_MSG)
+                print(f"{addr} heartbeat-triggered reconnect")
+
+
             else:
                 conn.send(KEY_EXCHANGE_FAILED_MSG)
                 conn.close()
@@ -122,8 +121,6 @@ def Connection_Handling(s):
             threading.Thread(target=handle_client, args=(conn, addr),daemon=True).start()
         except Exception as e:
             print(f"[-] Connection error: {e}")
-            break
-    s.close()
 
 
 
@@ -134,7 +131,7 @@ def turtle():
         try:
             prompt = f"{current_client} > " if current_client else "turtle > "
             cmd = input(prompt)
-
+    
             if not cmd:
                 continue
             elif cmd == "list":
@@ -182,34 +179,27 @@ def list_connections():
 
 def send_commands(conn, cmd):
     try:
-        # command = ls -la /home
-        # parts = [ "ls" , "-la" , "/home" ]
-        parts = shlex.split(cmd)
-
-        command = parts[0] # ls
-        context = parts[1:] if len(parts) > 1 else [] # context = ["-la" , "/home"]
-
         
+        parts = shlex.split(cmd) #Split the command into parts handling quoted arguments.
+        command = parts[0]
+        context = parts[1:] if len(parts) > 1 else []
+
         payload = {
             "command": command,
             "args": context,
             "flags": []
         }
-        # payload = {"command" : "ls" , "args : ["/home"]" , flags : ["-la"] }
-
         payload["flags"] = [flag for flag in context if flag.startswith('-')]
         payload["args"] = [arg for arg in context if not arg.startswith('-')]
         
-      
-        
-        
+        # Send the JSON payload with length prefix then
         # convert the length of payload_bytes to a 4-byte binary representation
-        payload_str = json.dumps(payload)
-
         # and then send the length prefix followed by the JSON payload
-        payload_bytes = payload_str.encode()
-
         # this is to inform the client of the exact size that he needs to read.
+        
+
+        payload_str = json.dumps(payload)
+        payload_bytes = payload_str.encode()
         payload_length = len(payload_bytes).to_bytes(4, byteorder='big')
         
         conn.send(payload_length + payload_bytes)
