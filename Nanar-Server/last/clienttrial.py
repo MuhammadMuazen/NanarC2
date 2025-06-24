@@ -9,9 +9,18 @@ KEY_EXCHANGE_SUCCEEDED_MSG = b'KEY_EXCHANGE_SUCCEEDED_MSG'
 KEY_EXCHANGE_FAILED_MSG = b'KEY_EXCHANGE_FAILED_MSG'
 
 # Client configuration
-SERVER_IP = "192.168.225.117"  # Server's IP address
+SERVER_IP = "127.0.0.1"  # Server's IP address
 SERVER_PORT = 9999        # Server's port
 CLIENT_KEY = "password"   # Must match the server's 'key' variable
+
+
+def generate_client_id(length=12):
+    characters = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
+    return ''.join(secrets.choice(characters) for _ in range(length))
+
+
+for _ in range(5):
+    print(generate_client_id())
 
 def main():
     try:
