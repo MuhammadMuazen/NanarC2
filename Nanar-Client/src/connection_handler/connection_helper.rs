@@ -80,8 +80,8 @@ pub fn hearbeat_connection(sock_addr: std::net::SocketAddr, heartbeat_message_du
                 if call_reason == messages::MISCONNECTION_OR_MISCOMMUNICATION {
 
                     // Now init the heartbeat connection
-                    match stream.write(messages::HEARTBEAT_RETRY_CONNECTION_MSG) {
-                        Ok(_) => println!("[+] Sent the message: {:?}", messages::HEARTBEAT_RETRY_CONNECTION_MSG),
+                    match stream.write(messages::HEARTBEAT_RETRY_INIT_CONNECTION_MSG) {
+                        Ok(_) => println!("[+] Sent the message: {:?}", messages::HEARTBEAT_RETRY_INIT_CONNECTION_MSG),
                         Err(e) => println!("[-] Error could not send the HEARTBEAT_RETRY_CONNECTION_MSG: {}", e)
                     };
 
