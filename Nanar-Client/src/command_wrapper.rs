@@ -8,7 +8,10 @@ pub fn excute_server_command(server_command: &str) -> String {
         if server_command == "pwd" {
 
             return super::fs_functions::get_current_dir();
-        } 
+        
+        } else if server_command == "cd" {
+            // TODO
+        }
     } else {
 
         return "This command is not avaliable in the client".to_string();
