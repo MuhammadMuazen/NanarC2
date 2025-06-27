@@ -11,6 +11,10 @@ pub fn excute_server_command(server_command: &str) -> String {
         
         } else if server_command == "cd" {
             // TODO
+        } else if server_command == "terminate" {
+            // terminate the client process completely
+            std::process::exit(0);
+
         }
     } else {
 
