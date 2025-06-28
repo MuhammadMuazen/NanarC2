@@ -1,5 +1,7 @@
 import socket
 import hashlib
+import string
+import secrets
 
 # Messaging protocol constants (must match the server's)
 CHECK_SERVER_MSG = b'CHECK_SERVER_MSG'
