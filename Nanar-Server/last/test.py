@@ -94,7 +94,7 @@ def handle_client(conn ,addr):
                 print(f"[+] {addr} checked server status")
 
             #here we assume that client is sending the key with the "init_key" message:
-            elif data.startswith(CLIENT_INIT_CONN_KEY_MSG) and current_step == SERVER_IS_UP_MSG:
+            elif data.decode() == key and current_step == SERVER_IS_UP_MSG:
                 #Extracting client key hash from message and comparing to server`s hash: 
                 client_key_hash = data[len(CLIENT_INIT_CONN_KEY_MSG):]
                 if client_key_hash == server_key_hash:
