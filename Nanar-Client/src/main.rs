@@ -7,6 +7,10 @@ async fn main() {
     const SERVER_ADDR: &str = "127.0.0.1";
     const SERVER_PORT: &str = "9999";
 
+    // Var to check if hearbeat is on
+    // TODO
+    let mut heart_beat_on: bool = true;
+
     loop {
 
         // First Initilize the connection
