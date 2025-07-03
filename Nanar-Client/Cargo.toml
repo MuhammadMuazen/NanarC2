@@ -2,6 +2,7 @@
 name = "nanar_client"
 version = "0.1.0"
 edition = "2024"
+#### Remove this if you want to stop the client from showing as a console window
 #[target.'cfg(windows)'.windows_subsystem]
 #windows = true  # Disables the console
 

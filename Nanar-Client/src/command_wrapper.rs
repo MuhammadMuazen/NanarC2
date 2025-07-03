@@ -1,3 +1,7 @@
+/*
+    This file is a wrapper for all the commands that can be sent from the server to the client
+*/
+
 const AVAILABLE_COMMANDS: [&str; 2] = ["pwd", "ls"]; 
 
 // TODO

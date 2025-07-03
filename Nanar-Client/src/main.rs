@@ -1,3 +1,8 @@
+/*
+    The main function still needs some modifications and it is not ready fully.
+*/
+
+
 use nanar_client::{connection_handler::heartbeat, *};
 
 #[tokio::main]

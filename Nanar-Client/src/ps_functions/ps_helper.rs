@@ -14,6 +14,7 @@ use windows::{
     }
 };
 
+// Get child processes of a certain function
 pub fn get_child_processes(parent_pid: u32) -> windows::core::Result<Vec<u32>>{
 
     unsafe {
@@ -44,9 +45,11 @@ pub fn get_child_processes(parent_pid: u32) -> windows::core::Result<Vec<u32>>{
     }
 }
 
+// Suspend any process using it's ID
 pub fn suspend_process(pid: u32) -> windows::core::Result<()> {
     
     unsafe {
+
         let handle:windows::Win32::Foundation::HANDLE = OpenProcess(
             PROCESS_SUSPEND_RESUME, false, pid)?;
         
@@ -62,6 +65,7 @@ pub fn suspend_process(pid: u32) -> windows::core::Result<()> {
     }
 }
 
+// Resume any process using it's ID
 pub fn resume_process(pid: u32) -> windows::core::Result<()> {
     
     unsafe {

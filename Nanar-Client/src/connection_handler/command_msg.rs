@@ -1,5 +1,5 @@
 /*
-    This file holds the command CommandMessage response message form struct
+    This file holds the command CommandMessage & CommandResponse message form struct
 */
 
 use serde::{Deserialize, Serialize};

