@@ -18,3 +18,8 @@ FUCK UNI.
 |  |   |  |\ \._,\ '/|  |   |  |\ \._,\ '/|_|                  `/    _.'         
 '--'   '--' `--'  `" '--'   '--' `--'  `"                      ( _.-'     
 ```
+
+---
+### Note:
+
+I am going to rewrite this waaaay better with aother languages later.
