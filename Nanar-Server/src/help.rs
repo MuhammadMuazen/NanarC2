@@ -98,3 +98,35 @@ pub fn print_avaliable_local_commands() {
     [8] exit --> Exit the server (Warning: This will terminate all the clients connections with the servers).
 "#);
 }
+
+pub fn print_avaliable_remote_commands() {
+
+    println!(r#"
+[i] These are the commands that can be sent from the server to be executed on the client and can be run inside the client's
+    interactive shell:
+    
+    [1]  help                            Prints this help message.
+    [2]  pwd                             Print current working directory.
+    [3]  ls [path]                       List the contents of the specified path.
+    [4]  cd [path]                       Change the current working directory to the specified directory.
+    [5]  read [file-path]                Prints the content of the specifed file.
+    [6]  write ["content"] [file-path]   Write the specified content to the content of the specified file.
+    [8]  rf [file-path]                  Remove file specified by the file path.
+    [9]  rd [dir-path]                   Remove directory specified by the directory path.
+    [10] mdir [path]                     Make a directory in the specified path.
+    [11] cp [src-path] [dest-path]       Copy a file/directory from the source path to the destination path.
+    [12] mv [src-path] [dest-path]       Move a file/directory from the source path to the destination path.
+    [13] exec [exe-name] [exe-args]      Run an executable specified by the executable name.
+    [14] ps [options]                    Print the current runnning processes in the system (no options it prints the process name and ID). 
+            1) -pid                      Process ID.
+            2) -u                        Process user.
+            3) -p                        Process executable path.
+            4) -arch                     Process architecture.
+            5) -m                        Process memory usage.
+            6) -ppid                     Process parent ID.
+            7) -sid                      Process SID.
+    15) pk [process-id]                  Kill process by providing its ID.
+    16) terminate [-f]                   Terminate the connection between the client and the server without making the client 
+                                         process stop on the client machine unless we provide the option {{ -f }}.                   
+"#);
+}

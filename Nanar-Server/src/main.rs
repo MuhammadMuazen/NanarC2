@@ -7,5 +7,7 @@ fn main() {
 
     //help::help_message();
 
-    help::print_avaliable_local_commands();
+    //help::print_avaliable_local_commands();
+
+    help::print_avaliable_remote_commands();
 }
