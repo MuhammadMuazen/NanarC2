@@ -1,13 +1,9 @@
-use nanar_server::help;
+use nanar_server::args_handler;
 
 fn main() {
     
     // Get the command line args
-    //let args: Vec<String> = std::env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
 
-    //help::help_message();
-
-    //help::print_avaliable_local_commands();
-
-    help::print_avaliable_remote_commands();
+    args_handler::arguments_handler(args);
 }

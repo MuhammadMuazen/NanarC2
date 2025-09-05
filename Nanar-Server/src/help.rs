@@ -1,4 +1,4 @@
-const LOGO_STR: &str = r#"
+pub const LOGO_STR: &str = r#"
                                                          _..._                   
                                                       .-'_..._''.     .-''-.     
    _..._                _..._                       .' .'      '.\  .' .-.  )    
@@ -50,7 +50,7 @@ pub fn help_message() {
 "#, LOGO_STR, executable_name_string);
 }
 
-pub fn print_avaliable_local_commands() {
+pub fn print_local_commands() {
 
     println!(r#"    
 [i] These commands can be run inside the server command line interface:
@@ -99,7 +99,7 @@ pub fn print_avaliable_local_commands() {
 "#);
 }
 
-pub fn print_avaliable_remote_commands() {
+pub fn print_remote_commands() {
 
     println!(r#"
 [i] These are the commands that can be sent from the server to be executed on the client and can be run inside the client's
