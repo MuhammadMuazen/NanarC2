@@ -32,6 +32,10 @@ pub fn arguments_handler(args: Vec<String>) {
         // Check for the {{ -prc, --print-remote-commands }} option
         else if args[1] == "-prc" || args[1] == "--print-remote-commands" {
             crate::help::print_remote_commands();
+        } else {
+            println!("[!] Error: Invalid option or option value!");
+            println!("[i] you can check the help menu using the option {{-h, --help }}.");
+            std::process::exit(-1);
         }
 
     } else if args.len() == 3 {
@@ -41,9 +45,13 @@ pub fn arguments_handler(args: Vec<String>) {
             // TODO Run the remove client function
         }
         // Check for the command {{ -pcf, --point-client-file [Path] }}
-        if args[1] == "-pcf" || args[1] == "--point-client-file" {
+        else if args[1] == "-pcf" || args[1] == "--point-client-file" {
             println!("[i] Pointing to another clients file...");
             // TODO Run the poiting to another clients file function
+        } else {
+            println!("[!] Error: Invalid option or option value!");
+            println!("[i] you can check the help menu using the option {{-h, --help }}.");
+            std::process::exit(-1);
         }
     }
 
