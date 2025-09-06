@@ -1,9 +1,13 @@
+use colored::Colorize;
+
 pub fn arguments_handler(args: Vec<String>) {
 
     if args.len() == 1 {
-        println!("{}\n", crate::help::LOGO_STR);
-        println!("[i] Starting the server...\n");
-        // TODO Run the server
+        
+        println!("{}\n", crate::help::LOGO_STR.yellow());
+        println!("{}\n", "[i] Starting the server...".blue());
+        crate::server_shell::server_shell();
+
     } else if args.len() == 2 {
 
         // Check for {{ -h, --help }} option
@@ -33,8 +37,8 @@ pub fn arguments_handler(args: Vec<String>) {
         else if args[1] == "-prc" || args[1] == "--print-remote-commands" {
             crate::help::print_remote_commands();
         } else {
-            println!("[!] Error: Invalid option or option value!");
-            println!("[i] you can check the help menu using the option {{-h, --help }}.");
+            println!("{}", "[!] Error: Invalid option or option value!".red());
+            println!("{}", "[i] you can check the help menu using the option {{-h, --help }}.".blue());
             std::process::exit(-1);
         }
 
@@ -49,8 +53,8 @@ pub fn arguments_handler(args: Vec<String>) {
             println!("[i] Pointing to another clients file...");
             // TODO Run the poiting to another clients file function
         } else {
-            println!("[!] Error: Invalid option or option value!");
-            println!("[i] you can check the help menu using the option {{-h, --help }}.");
+            println!("{}", "[!] Error: Invalid option or option value!".red());
+            println!("{}", "[i] you can check the help menu using the option {{-h, --help }}.".blue());
             std::process::exit(-1);
         }
     }
