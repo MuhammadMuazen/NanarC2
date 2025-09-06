@@ -1,4 +1,18 @@
+use std::io::Write;
 use colored::Colorize;
+
+fn file_exist(file_path: &std::path::Path) -> bool {
+
+    match file_path.exists() {
+
+        true => return true,
+        false => {
+
+            println!("\n{0}{1}\n", "[!] Error: There is no file with name: ".red(), file_path.to_str().unwrap_or("<invalid UTF-8>").red());
+            return false;
+        }
+    }
+}
 
 fn is_valid_json_data(json_data_str: &str) -> bool {
 
@@ -27,7 +41,7 @@ pub fn print_clients(clients_file_str: &str) {
 
     let clients_file_path: &std::path::Path = std::path::Path::new(clients_file_str);
 
-    if clients_file_path.exists() {
+    if file_exist(clients_file_path) {
 
         println!("\n{0} {1}\n", "[i] Clients file path: ".blue(), clients_file_str.blue());
 
@@ -41,8 +55,46 @@ pub fn print_clients(clients_file_str: &str) {
 
             println!("{}", "[-] Error: Could not read the clients json file!".red());
         }
-    } else {
 
-        println!("\n{}\n", "[!] Error: Clients json file does not exist in this path please recheck the server configurations!".red());
     }
+}
+
+pub fn remove_all_clients(clients_file_str: &str) {
+
+    // Ask the user to confirm his choice to remove all the clients
+    let mut user_input_choice: String = String::new();
+
+    print!("{}", "[i] Are you sure you want to remove all the clients from the clients file (y/n): ".blue());
+    
+    std::io::stdout().flush().expect("[-] Error Failed to flush stdout");
+    std::io::stdin().read_line(&mut user_input_choice).expect("[!] Error: Could not get the user choice");
+    
+    let user_input_choice: &str = user_input_choice.trim();
+
+    match user_input_choice {
+
+        "y" | "Y" => {
+
+            let clients_file_path: &std::path::Path = std::path::Path::new(clients_file_str);
+
+            if file_exist(clients_file_path) {
+
+                println!("{}", "[i] Removing all the contents of the clients file...".blue());
+                
+                match std::fs::write(clients_file_path, "") {
+                    
+                    Ok(()) => println!("{}", "[+] Clients file contents have been removed!".green()),
+                    
+                    Err(error) => 
+                        println!("{0}{1}", "[!] Error Could not remove the client file contents due to ".red(), error.to_string().red()) 
+                }
+            }
+        }
+        _ => {
+
+            println!("\n{}\n", "[!] Clients file contents have not been removed!".red());
+        } 
+
+    }
+
 }
