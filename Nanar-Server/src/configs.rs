@@ -1,5 +1,42 @@
+/*
+    config.rs: Made by Muhammad Muzen
+
+    This file holds all the functions and values needed to minipulate the server files and configurations.
+    
+*/
+
 use std::io::Write;
 use colored::Colorize;
+
+pub const NANARC2_DIRECTORY_NAME: &str = "nanarc2";
+
+pub fn get_username() -> String {
+    
+    if cfg!(target_os = "windows") {
+        
+        std::env::var("USERNAME").unwrap_or_else(|_| "unknown".to_string())
+    
+    } else {
+        
+        std::env::var("USER").unwrap_or_else(|_| "unknown".to_string())
+    }
+}
+
+pub fn get_default_config_path() -> String {
+    
+    if cfg!(target_os = "windows") {
+        
+        format!("C:\\Users\\{}\\Documents\\{}\\nanarc2_config.json", get_username(), NANARC2_DIRECTORY_NAME)
+    
+    } else if cfg!(target_os = "linux") {
+        
+        format!("/usr/share/{}/nanarc2_config.json", NANARC2_DIRECTORY_NAME)
+    
+    } else {
+        
+        panic!("Unsupported OS");
+    }
+}
 
 fn file_exist(file_path: &std::path::Path) -> bool {
 
@@ -96,5 +133,10 @@ pub fn remove_all_clients(clients_file_str: &str) {
         } 
 
     }
+
+}
+
+pub fn check_config_file() {
+
 
 }

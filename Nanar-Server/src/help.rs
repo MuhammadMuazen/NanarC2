@@ -42,10 +42,9 @@ pub fn help_message() {
     [i] Options:
 
         -h,   --help                      Prints this help message.
-        -pc,  --print-clients             Prints the contents of the json file that contains all the clients IDs.
+        -pc,  --print-clients             Prints the contents of the json file that contains all the clients IDs and its path.
         -rc,  --remove-client [ID]        Remove a client ID and information from the json file that contains all the clients IDs.
         -rac, --remove-all-clients        Delets the clients information json file.
-        -gcf, --get-clients-file          Prints the path of the clients information json file.
         -pcf, --point-client-file [Path]  Make the server point to another clients json file.
         -plc, --print-local-commands      Prints all the avaliable commands that we can run once we start the server.
         -prc, --print-remote-commands     Prints all the avaliable commands that can be sent to the client.
@@ -97,7 +96,7 @@ pub fn print_local_commands() {
 
     [8] prc, print-remote-commands --> Prints all the avaliable commands that can be sent to the client.
 
-    [9] pc, print-clients --> Prints the contents of the json file that contains all the clients IDs.
+    [9] pc, print-clients --> Prints the contents of the json file that contains all the clients IDs and its path.
 
     [10] pcf, point-client-file [path] --> Make the server point to another clients json file.
 

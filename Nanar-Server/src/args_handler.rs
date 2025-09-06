@@ -4,8 +4,6 @@ pub fn arguments_handler(args: Vec<String>) {
 
     if args.len() == 1 {
         
-        println!("{}\n", crate::help::LOGO_STR.yellow());
-        println!("{}\n", "[i] Starting the server...".blue());
         crate::server_shell::server_shell();
 
     } else if args.len() == 2 {
@@ -23,11 +21,6 @@ pub fn arguments_handler(args: Vec<String>) {
         else if args[1] == "-rac" || args[1] == "--remove-all-clients" {
 
             crate::configs::remove_all_clients(r"C:\Users\muhammad\Desktop\vvv.txt"); // Change later
-        }
-        // Check for the {{ -gcf, --get-clients-file }} option
-        else if args[1] == "-gcf" || args[1] == "--get-clients-file" {
-            println!("[i] Printing the clients.json file path...");
-            // TODO Run printing the clients.jon path function
         }
         // Check for the {{ -plc, --print-local-commands }} option
         else if args[1] == "-plc" || args[1] == "--print-local-commands" {
