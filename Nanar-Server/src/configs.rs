@@ -16,9 +16,13 @@ pub fn get_username() -> String {
         
         std::env::var("USERNAME").unwrap_or_else(|_| "unknown".to_string())
     
-    } else {
+    } else if cfg!(target_os = "linux") {
         
         std::env::var("USER").unwrap_or_else(|_| "unknown".to_string())
+    
+    } else {
+
+        panic!("{}", "Error: Unsupported OS".red())
     }
 }
 
@@ -34,7 +38,23 @@ pub fn get_default_config_path() -> String {
     
     } else {
         
-        panic!("Unsupported OS");
+        panic!("{}", "Error: Unsupported OS".red())
+    }
+}
+
+pub fn get_default_clients_path() -> String {
+    
+    if cfg!(target_os = "windows") {
+        
+        format!("C:\\Users\\{}\\Documents\\{}\\clients.json", get_username(), NANARC2_DIRECTORY_NAME)
+    
+    } else if cfg!(target_os = "linux") {
+        
+        format!("/usr/share/{}/clients.json", NANARC2_DIRECTORY_NAME)
+    
+    } else {
+        
+        panic!("{}", "Error: Unsupported OS".red())
     }
 }
 
