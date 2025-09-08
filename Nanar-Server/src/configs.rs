@@ -10,6 +10,23 @@ use colored::Colorize;
 
 pub const NANARC2_DIRECTORY_NAME: &str = "nanarc2";
 
+pub fn get_nanarc2_dir_path() -> String {
+    
+    if cfg!(target_os = "windows") {
+
+        format!("C:\\Users\\{}\\Documents\\{}", get_username(), NANARC2_DIRECTORY_NAME)
+
+    } else if cfg!(target_os = "linux") {
+        
+        format!("/usr/share/{}", NANARC2_DIRECTORY_NAME)
+    
+    } else {
+
+        panic!("{}", "Error: Unsupported OS".red())
+    }
+}
+
+
 pub fn get_username() -> String {
     
     if cfg!(target_os = "windows") {
@@ -30,11 +47,11 @@ pub fn get_default_config_path() -> String {
     
     if cfg!(target_os = "windows") {
         
-        format!("C:\\Users\\{}\\Documents\\{}\\nanarc2_config.json", get_username(), NANARC2_DIRECTORY_NAME)
+        format!("{}\\nanarc2_config.json", get_nanarc2_dir_path())
     
     } else if cfg!(target_os = "linux") {
         
-        format!("/usr/share/{}/nanarc2_config.json", NANARC2_DIRECTORY_NAME)
+        format!("{}/nanarc2_config.json", get_nanarc2_dir_path())
     
     } else {
         
@@ -46,11 +63,11 @@ pub fn get_default_clients_path() -> String {
     
     if cfg!(target_os = "windows") {
         
-        format!("C:\\Users\\{}\\Documents\\{}\\clients.json", get_username(), NANARC2_DIRECTORY_NAME)
+        format!("{}\\clients.json", get_nanarc2_dir_path())
     
     } else if cfg!(target_os = "linux") {
         
-        format!("/usr/share/{}/clients.json", NANARC2_DIRECTORY_NAME)
+        format!("{}/clients.json", get_nanarc2_dir_path())
     
     } else {
         
@@ -66,6 +83,19 @@ fn file_exist(file_path: &std::path::Path) -> bool {
         false => {
 
             println!("\n{0}{1}\n", "[!] Error: There is no file with name: ".red(), file_path.to_str().unwrap_or("<invalid UTF-8>").red());
+            return false;
+        }
+    }
+}
+
+fn directory_exists(dir_path: &std::path::Path) -> bool {
+
+    match dir_path.exists() && dir_path.is_dir() {
+
+        true => return true,
+        false => {
+
+            println!("\n{0}", format!("[-] Error: Directory {} does not exists!", dir_path.to_str().unwrap_or("<invalid UTF-8>")).red());
             return false;
         }
     }
@@ -156,7 +186,19 @@ pub fn remove_all_clients(clients_file_str: &str) {
 
 }
 
+// TODO First
 pub fn check_config_file() {
 
+    match directory_exists(std::path::Path::new(&get_nanarc2_dir_path())) {
+
+        true => {
+
+            println!("{}", format!("[i] Found server configuration directory at: {}", get_nanarc2_dir_path()).blue());
+        }
+        false => {
+
+            println!("{}", format!("[+] Creating default server configuration directory at: {}", get_nanarc2_dir_path()).green());
+        } 
+    }
 
 }

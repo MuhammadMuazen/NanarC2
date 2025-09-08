@@ -4,8 +4,9 @@ use colored::Colorize;
 pub fn server_shell() {
 
     println!("{}\n", crate::help::LOGO_STR.yellow());
-    println!("{}\n", "[i] Starting the server...".blue());
+    println!("{}", "[i] Starting the server...".blue());
     // TODO Check the config file.
+    crate::configs::check_config_file();
     // TODO Check the clients.json file.
 
     loop {
