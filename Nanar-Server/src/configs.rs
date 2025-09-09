@@ -186,9 +186,9 @@ pub fn remove_all_clients(clients_file_str: &str) {
 
 }
 
-// TODO First
 pub fn check_config_file() {
 
+    // Check for default configuration directory existance
     match directory_exists(std::path::Path::new(&get_nanarc2_dir_path())) {
 
         true => {
@@ -197,8 +197,25 @@ pub fn check_config_file() {
         }
         false => {
 
-            println!("{}", format!("[+] Creating default server configuration directory at: {}", get_nanarc2_dir_path()).green());
+            println!("{}", format!("[i] Creating default server configuration directory at: {}", get_nanarc2_dir_path()).blue());
+
+            // Creating the nanarc2 directory.
+            match std::fs::create_dir(std::path::Path::new(&get_nanarc2_dir_path())) {
+                
+                Ok(_) => println!("{}", format!("[+] Created the default configuration directory at: {}", &get_nanarc2_dir_path()).green()),
+                Err(_) => {
+
+                    println!("{}", format!(
+                        "[-] Error Could not create the default configuration directory at: {}", &get_nanarc2_dir_path()).red());
+                    println!("{}", "[i] Creating it manually might help!".blue());
+
+                    std::process::exit(-1);
+                }
+            }
         } 
     }
+
+    // Check for the default server json configuration file existance 
+    // TODO
 
 }
