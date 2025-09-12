@@ -26,7 +26,6 @@ pub fn get_nanarc2_dir_path() -> String {
     }
 }
 
-
 pub fn get_username() -> String {
     
     if cfg!(target_os = "windows") {
@@ -75,14 +74,14 @@ pub fn get_default_clients_path() -> String {
     }
 }
 
-fn file_exist(file_path: &std::path::Path) -> bool {
+fn file_exists(file_path: &std::path::Path) -> bool {
 
     match file_path.exists() {
 
         true => return true,
         false => {
 
-            println!("\n{0}{1}\n", "[!] Error: There is no file with name: ".red(), file_path.to_str().unwrap_or("<invalid UTF-8>").red());
+            println!("{0}{1}", "[-] Error: There is no file with name: ".red(), file_path.to_str().unwrap_or("<invalid UTF-8>").red());
             return false;
         }
     }
@@ -128,7 +127,7 @@ pub fn print_clients(clients_file_str: &str) {
 
     let clients_file_path: &std::path::Path = std::path::Path::new(clients_file_str);
 
-    if file_exist(clients_file_path) {
+    if file_exists(clients_file_path) {
 
         println!("\n{0} {1}\n", "[i] Clients file path: ".blue(), clients_file_str.blue());
 
@@ -164,7 +163,7 @@ pub fn remove_all_clients(clients_file_str: &str) {
 
             let clients_file_path: &std::path::Path = std::path::Path::new(clients_file_str);
 
-            if file_exist(clients_file_path) {
+            if file_exists(clients_file_path) {
 
                 println!("{}", "[i] Removing all the contents of the clients file...".blue());
                 
@@ -188,25 +187,29 @@ pub fn remove_all_clients(clients_file_str: &str) {
 
 pub fn check_config_file() {
 
+    let nanarc2_dir_path: String = get_nanarc2_dir_path();
+    let default_config_path: String = get_default_config_path();
+    //let default_clients_path: String = get_default_clients_path();
+
     // Check for default configuration directory existance
-    match directory_exists(std::path::Path::new(&get_nanarc2_dir_path())) {
+    match directory_exists(std::path::Path::new(&nanarc2_dir_path)) {
 
         true => {
 
-            println!("{}", format!("[i] Found server configuration directory at: {}", get_nanarc2_dir_path()).blue());
+            println!("{}", format!("[i] Found server configuration directory at: {}", nanarc2_dir_path).blue());
         }
         false => {
 
-            println!("{}", format!("[i] Creating default server configuration directory at: {}", get_nanarc2_dir_path()).blue());
+            println!("{}", format!("[i] Creating default server configuration directory at: {}", nanarc2_dir_path).blue());
 
             // Creating the nanarc2 directory.
             match std::fs::create_dir(std::path::Path::new(&get_nanarc2_dir_path())) {
                 
-                Ok(_) => println!("{}", format!("[+] Created the default configuration directory at: {}", &get_nanarc2_dir_path()).green()),
+                Ok(_) => println!("{}", format!("[+] Created the default configuration directory at: {}", nanarc2_dir_path).green()),
                 Err(_) => {
 
                     println!("{}", format!(
-                        "[-] Error Could not create the default configuration directory at: {}", &get_nanarc2_dir_path()).red());
+                        "[-] Error Could not create the default configuration directory at: {}", nanarc2_dir_path).red());
                     println!("{}", "[i] Creating it manually might help!".blue());
 
                     std::process::exit(-1);
@@ -216,6 +219,39 @@ pub fn check_config_file() {
     }
 
     // Check for the default server json configuration file existance 
-    // TODO
+    match file_exists(std::path::Path::new(&default_config_path)) {
 
+        true => {
+
+            // Check if the json file format is ok
+            if is_valid_json_data(std::fs::read_to_string(&default_config_path).unwrap().as_str()) {
+
+                println!("{}", format!("[i] Found configuration file in: {}", default_config_path).blue());
+                // TODO check for the keys in the configuration file
+            
+            } else {
+
+                println!("{}", format!("[-] Error: Unvalid json format in the configuration file!").red());
+                std::process::exit(-1);
+            } 
+
+        },
+        false => {
+
+            println!("{}", format!("[-] Error: Configuration file could not be found in: {}", default_config_path).red());
+            println!("{}", format!("[i] Creating new configuration file in path: {}", default_config_path).blue());
+
+            let mut new_config_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(&default_config_path);
+
+            match new_config_file {
+
+                Ok(file) => {
+
+                    //TODO Write to the file
+                }, Err(err) => {
+                    // Err print
+                }
+            }
+        }
+    }
 }
