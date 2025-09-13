@@ -74,6 +74,17 @@ pub fn get_default_clients_path() -> String {
     }
 }
 
+// this is unvalid json data // TODO fix
+fn default_config_file_content() -> String {
+
+    let json_content: Result<_, serde_json::Error> = serde_json::from_str(
+        format!("{{\n\t\"default_clients_file_path\" = \"{}\"\n}}", get_default_clients_path()).as_str());
+
+    let str_content: Result<String, serde_json::Error> = serde_json::to_string(&json_content.unwrap());
+
+    
+}
+
 fn file_exists(file_path: &std::path::Path) -> bool {
 
     match file_path.exists() {
@@ -241,13 +252,29 @@ pub fn check_config_file() {
             println!("{}", format!("[-] Error: Configuration file could not be found in: {}", default_config_path).red());
             println!("{}", format!("[i] Creating new configuration file in path: {}", default_config_path).blue());
 
-            let mut new_config_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(&default_config_path);
+            let new_config_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(&default_config_path);
 
             match new_config_file {
 
-                Ok(file) => {
+                Ok(mut file) => {
+                    
+                    //Write the default configurations to the file\
+                    // TODO write a specific writing function
+                    match file.write_all(default_config_file_content().as_bytes()) {
+                        
+                        Ok(_) => {
+                            
+                            println!("{}", format!("[+] Writing the default config file content successfully!").green());
+                            
+                            let _ = file.flush();
+                        },
+                        Err(_) => {
+                                
+                            println!("{}", format!("[-] Error: Could not write the default configuration to the config file").red());
+                            std::process::exit(-1);
+                        }
+                    }
 
-                    //TODO Write to the file
                 }, Err(err) => {
                     // Err print
                 }
