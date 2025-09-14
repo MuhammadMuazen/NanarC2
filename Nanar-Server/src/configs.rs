@@ -74,16 +74,15 @@ pub fn get_default_clients_path() -> String {
     }
 }
 
-// this is unvalid json data // TODO fix
-fn default_config_file_content() -> String {
+// fn default_config_file_content() -> String {
 
-    let json_content: Result<_, serde_json::Error> = serde_json::from_str(
-        format!("{{\n\t\"default_clients_file_path\" = \"{}\"\n}}", get_default_clients_path()).as_str());
+//     let json_content: Result<_, serde_json::Error> = serde_json::from_str(
+//         format!("{{\n\t\"default_clients_file_path\" = \"{}\"\n}}", get_default_clients_path()).as_str());
 
-    let str_content: Result<String, serde_json::Error> = serde_json::to_string(&json_content.unwrap());
+//     let str_content: Result<String, serde_json::Error> = serde_json::to_string(&json_content.unwrap());
 
-    
-}
+//     return str_content.unwrap().to_string();
+// }
 
 fn file_exists(file_path: &std::path::Path) -> bool {
 
@@ -107,6 +106,23 @@ fn directory_exists(dir_path: &std::path::Path) -> bool {
 
             println!("\n{0}", format!("[-] Error: Directory {} does not exists!", dir_path.to_str().unwrap_or("<invalid UTF-8>")).red());
             return false;
+        }
+    }
+}
+
+fn write_to_file(mut file_path: std::fs::File, content_to_write: &str) -> bool {
+
+    match file_path.write_all(content_to_write.as_bytes()) {
+
+        Ok(_) => {
+            
+            file_path.flush();
+            true
+        },
+        Err(_) => {
+
+            println!("{}", format!("[-] Error: Could not write to file {:?}", file_path).red());
+            false
         }
     }
 }
@@ -202,7 +218,7 @@ pub fn check_config_file() {
     let default_config_path: String = get_default_config_path();
     //let default_clients_path: String = get_default_clients_path();
 
-    // Check for default configuration directory existance
+    // 1. Check for default configuration directory existance
     match directory_exists(std::path::Path::new(&nanarc2_dir_path)) {
 
         true => {
@@ -229,16 +245,16 @@ pub fn check_config_file() {
         } 
     }
 
-    // Check for the default server json configuration file existance 
+    // 2. Check for the default server json configuration file existance 
     match file_exists(std::path::Path::new(&default_config_path)) {
 
         true => {
 
-            // Check if the json file format is ok
+            // 2.1. Check if the json file format is ok
             if is_valid_json_data(std::fs::read_to_string(&default_config_path).unwrap().as_str()) {
 
                 println!("{}", format!("[i] Found configuration file in: {}", default_config_path).blue());
-                // TODO check for the keys in the configuration file
+                // 2.2. TODO check for the keys in the configuration file
             
             } else {
 
@@ -247,6 +263,7 @@ pub fn check_config_file() {
             } 
 
         },
+        // 2.3. If the default configuration file does not exist
         false => {
 
             println!("{}", format!("[-] Error: Configuration file could not be found in: {}", default_config_path).red());
@@ -255,28 +272,28 @@ pub fn check_config_file() {
             let new_config_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(&default_config_path);
 
             match new_config_file {
-
-                Ok(mut file) => {
+                // 2.4. Create the default configuration file
+                Ok(file) => {
                     
-                    //Write the default configurations to the file\
-                    // TODO write a specific writing function
-                    match file.write_all(default_config_file_content().as_bytes()) {
+                    //2.4.1. Write the default configurations to the file
+                    match write_to_file(file, "&default_config_file_content()") {
                         
-                        Ok(_) => {
+                        true => {
                             
                             println!("{}", format!("[+] Writing the default config file content successfully!").green());
-                            
-                            let _ = file.flush();
+                            // TODO write the default configs
                         },
-                        Err(_) => {
+                        false => {
                                 
                             println!("{}", format!("[-] Error: Could not write the default configuration to the config file").red());
                             std::process::exit(-1);
                         }
                     }
 
-                }, Err(err) => {
-                    // Err print
+                }, Err(_) => {
+                    
+                    println!("{}", format!("[-] Error: Could not create server configuration file in: {}", default_config_path));
+                    std::process::exit(-1);
                 }
             }
         }
