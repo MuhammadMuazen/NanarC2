@@ -36,6 +36,10 @@ pub fn server_shell() {
             println!("\n{}\n", "[i] Exiting NanarC2...".blue());
             std::process::exit(0);
 
+        } else if shell_input_vec_string[0] == "clear" && shell_input_vec_string.len() == 1{
+
+            crate::help::clear_screen()
+
         } else if shell_input_vec_string[0] == "help" && shell_input_vec_string.len() == 1 {
 
             crate::help::print_local_commands();

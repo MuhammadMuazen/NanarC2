@@ -1,4 +1,5 @@
 use colored::Colorize;
+use std::io::Write;
 
 pub const LOGO_STR: &str = r#"
                                                          _..._                   
@@ -100,7 +101,9 @@ pub fn print_local_commands() {
 
     [10] pcf, point-client-file [path] --> Make the server point to another clients json file.
 
-    [11] exit --> Exit the server (Warning: This will terminate all the clients connections with the servers).
+    [11] clear --> Clear the terminal screen.
+
+    [12] exit --> Exit the server (Warning: This will terminate all the clients connections with the servers).
 "#);
 }
 
@@ -134,4 +137,10 @@ pub fn print_remote_commands() {
     16) terminate [-f]                   Terminate the connection between the client and the server without making the client 
                                          process stop on the client machine unless we provide the option {{ -f }}.                   
 "#);
+}
+
+pub fn clear_screen() {
+    
+    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+    std::io::stdout().flush().unwrap();
 }
