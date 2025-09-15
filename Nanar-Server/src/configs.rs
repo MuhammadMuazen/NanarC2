@@ -74,15 +74,16 @@ pub fn get_default_clients_path() -> String {
     }
 }
 
-// fn default_config_file_content() -> String {
+pub fn default_config_file_content() -> serde_json::Map<String, serde_json::Value> {
 
-//     let json_content: Result<_, serde_json::Error> = serde_json::from_str(
-//         format!("{{\n\t\"default_clients_file_path\" = \"{}\"\n}}", get_default_clients_path()).as_str());
+    let mut def_conf_json_obj: serde_json::Map<String, serde_json::Value> = serde_json::Map::new();
 
-//     let str_content: Result<String, serde_json::Error> = serde_json::to_string(&json_content.unwrap());
+    // Add keys and values to the json configuration file
+    def_conf_json_obj.insert("default_clients_file_path".to_string(), serde_json::Value::String(get_default_clients_path()));
+    def_conf_json_obj.insert("listeners".to_string(), serde_json::Value::Array(vec![]));
 
-//     return str_content.unwrap().to_string();
-// }
+    def_conf_json_obj
+}
 
 fn file_exists(file_path: &std::path::Path) -> bool {
 
@@ -116,8 +117,15 @@ fn write_to_file(mut file_path: std::fs::File, content_to_write: &str) -> bool {
 
         Ok(_) => {
             
-            file_path.flush();
-            true
+            match file_path.flush() {
+                
+                Ok(_) => true,
+                Err(_) => {
+
+                    println!("{}", format!("[-] Error: Could not flush the file after writing to it!").red());
+                    false
+                }
+            }
         },
         Err(_) => {
 
@@ -276,12 +284,12 @@ pub fn check_config_file() {
                 Ok(file) => {
                     
                     //2.4.1. Write the default configurations to the file
-                    match write_to_file(file, "&default_config_file_content()") {
+                    match write_to_file(file, serde_json::to_string_pretty(&default_config_file_content()).unwrap().as_str()) {
                         
                         true => {
                             
-                            println!("{}", format!("[+] Writing the default config file content successfully!").green());
-                            // TODO write the default configs
+                            println!("{}", format!("[+] Finished writing the default configuration file content successfully!").green());
+                            
                         },
                         false => {
                                 

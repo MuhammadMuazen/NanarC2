@@ -50,7 +50,7 @@ pub fn server_shell() {
             // TODO Create client function
         } else if (shell_input_vec_string[0] == "ls" || shell_input_vec_string[0] == "list-sessions") && shell_input_vec_string.len() == 1 {
 
-            println!("[i] Listing Sesssions...");
+            println!("[i] Listing Sessions...");
             // TODO ist sessions function
         } else if (shell_input_vec_string[0] == "ll" || shell_input_vec_string[0] == "list-listeners") && shell_input_vec_string.len() == 1 {
             
