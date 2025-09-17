@@ -1,4 +1,4 @@
-use nanar_server::{args_handler};
+use nanar_server::args_handler;
 
 fn main() {
     

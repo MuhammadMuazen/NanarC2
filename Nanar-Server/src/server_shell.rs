@@ -4,10 +4,12 @@ use colored::Colorize;
 pub fn server_shell() {
 
     println!("{}\n", crate::help::LOGO_STR.yellow());
-    println!("{}", "[i] Starting the server...".blue());
-    // TODO Check the config file.
+    println!("{}", "[i] Starting NanarC2 server...".blue());
+    
+    // Check the server configuration directory and files
     crate::configs::check_config_file();
-    // TODO Check the clients.json file.
+
+    println!();
 
     loop {
 
