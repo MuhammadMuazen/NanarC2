@@ -79,7 +79,7 @@ pub fn default_config_file_content() -> serde_json::Map<String, serde_json::Valu
     let mut def_conf_json_obj: serde_json::Map<String, serde_json::Value> = serde_json::Map::new();
 
     // Add keys and values to the json configuration file
-    def_conf_json_obj.insert("default_clients_file_path".to_string(), serde_json::Value::String(get_default_clients_path()));
+    def_conf_json_obj.insert("clients_file_path".to_string(), serde_json::Value::String(get_default_clients_path()));
     def_conf_json_obj.insert("listeners".to_string(), serde_json::Value::Array(vec![]));
 
     def_conf_json_obj
@@ -155,6 +155,18 @@ fn pretty_json(json_data_str: &str) -> String {
     else {
 
         return "[!] Error: JSON file formation is not correct please recheck it!\n".red().to_string();
+    }
+}
+
+fn get_json_key_value<'a>(json_data: &'a serde_json::Value, key: &str) -> Option<&'a serde_json::Value> {
+    
+    if let serde_json::Value::Object(obj) = json_data {
+
+        obj.get(key)
+    
+    } else {
+        
+        None
     }
 }
 
@@ -307,14 +319,19 @@ pub fn check_config_file() {
         }
     };
 
-    // TODO Do something about checking the server clients file path first!
+    // 2.4. Checking the server clients file path first in the server configs.json file
+    let clients_file_path: String = serde_json::to_string(get_json_key_value(
+        &serde_json::from_str(&std::fs::read_to_string(&default_config_path).unwrap()).unwrap(),
+        "clients_file_path").unwrap()).unwrap();
 
-    // 2.4. Check for the default clients json file
+    // TODO check existance and handle the logic
+
+    // 2.4.1. Check for the default clients json file
     match file_exists(std::path::Path::new(&default_clients_path)) {
 
         true => {
 
-            // 2.4.1 Check if the json format in the clients json file is ok
+            // 2.4.2. Check if the json format in the clients json file is ok
             if is_valid_json_data(std::fs::read_to_string(&default_clients_path).unwrap().as_str()) {
 
                 println!("{}", format!("[i] Found clients json file in: {}", default_clients_path).blue());
@@ -324,7 +341,7 @@ pub fn check_config_file() {
                 println!("{}", format!("[-] Error: Unvalid json format in the clients json file!").red());
                 std::process::exit(-1);
             } 
-        // 2.4.2 Create the default clinets json file if the it does not exist
+        // 2.4.3. Create the default clinets json file if the it does not exist
         } false => {
 
             println!("{}", format!("[-] Error: clients json file could not be found in: {}", default_clients_path).red());
@@ -333,10 +350,10 @@ pub fn check_config_file() {
             let new_clients_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(&default_clients_path);
 
             match new_clients_file {
-                // 2.4.2. Create the default clients.json file
+                // 2.4.4. Create the default clients.json file
                 Ok(file) => {
                     
-                    //2.4.3. Write the default clients.json content to the default clients.json file
+                    //2.4.5. Write the default clients.json content to the default clients.json file
                     match write_to_file(file, serde_json::to_string_pretty("[]").unwrap().as_str()) {
                         
                         true => {
