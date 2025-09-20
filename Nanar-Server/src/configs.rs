@@ -204,13 +204,20 @@ pub fn print_clients() {
         }, false => {
 
             println!("{}", format!("[-] Error: Could not find the configuration file that have the key:value of the clients file path!").red());
-            println!("{}", format!("[i] You can run the server once to generate the default configuration file and the default clients file").blue());
+            println!("{}", format!("[i] You can run the server once to generate the default configuration file and the default clients file.").blue());
             std::process::exit(-1);
         }
     }
 }
 
-pub fn remove_all_clients(clients_file_str: &str) {
+pub fn remove_all_clients() {
+
+    if !file_exists(&std::path::Path::new(&get_default_config_path())) {
+        
+        println!("{}", format!("[!] Error: Could not find the configuration file that have the key that points to the clients file!").red());
+        println!("{}", format!("[i] You can run the server once to generate the default configuration file.").blue());
+        std::process::exit(-1);
+    }
 
     // Ask the user to confirm his choice to remove all the clients
     let mut user_input_choice: String = String::new();
@@ -222,17 +229,21 @@ pub fn remove_all_clients(clients_file_str: &str) {
     
     let user_input_choice: &str = user_input_choice.trim();
 
+    let clients_file_str: String = get_json_key_value(
+    &serde_json::from_str(&std::fs::read_to_string(&get_default_config_path()).unwrap()).unwrap(),
+    "clients_file_path").unwrap().as_str().unwrap().to_string();
+
     match user_input_choice {
 
         "y" | "Y" => {
 
-            let clients_file_path: &std::path::Path = std::path::Path::new(clients_file_str);
+            let clients_file_path: &std::path::Path = std::path::Path::new(&clients_file_str);
 
             if file_exists(clients_file_path) {
 
                 println!("{}", "[i] Removing all the contents of the clients file...".blue());
                 
-                match std::fs::write(clients_file_path, "") {
+                match std::fs::write(clients_file_path, "[]") {
                     
                     Ok(()) => println!("{}", "[+] Clients file contents have been removed!".green()),
                     
