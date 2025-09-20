@@ -7,7 +7,7 @@ pub fn server_shell() {
     println!("{}", "[i] Starting NanarC2 server...".blue());
     
     // Check the server configuration directory and files
-    crate::configs::check_config_file();
+    crate::configs::check_config_files();
 
     println!();
 
@@ -78,10 +78,6 @@ pub fn server_shell() {
 
             crate::configs::print_clients();
 
-        } else if shell_input_vec_string[0] == "pcf" || shell_input_vec_string[0] == "point-client-file" {
-
-            println!("[i] Pointing to another clients file...");
-            // TODO point to client file function
         } else {
 
             println!("{}", "[!] Error: Unknown command!".red());

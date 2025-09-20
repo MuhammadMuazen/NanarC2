@@ -99,11 +99,9 @@ pub fn print_local_commands() {
 
     [9] pc, print-clients --> Prints the contents of the json file that contains all the clients IDs and its path.
 
-    [10] pcf, point-client-file [path] --> Make the server point to another clients json file.
+    [10] clear --> Clear the terminal screen.
 
-    [11] clear --> Clear the terminal screen.
-
-    [12] exit --> Exit the server (Warning: This will terminate all the clients connections with the servers).
+    [11] exit --> Exit the server (Warning: This will terminate all the clients connections with the servers).
 "#);
 }
 
@@ -133,8 +131,8 @@ pub fn print_remote_commands() {
             5) -m                        Process memory usage.
             6) -ppid                     Process parent ID.
             7) -sid                      Process SID.
-    15) pk [process-id]                  Kill process by providing its ID.
-    16) terminate [-f]                   Terminate the connection between the client and the server without making the client 
+    [15] pk [process-id]                  Kill process by providing its ID.
+    [16] terminate [-f]                   Terminate the connection between the client and the server without making the client 
                                          process stop on the client machine unless we provide the option {{ -f }}.                   
 "#);
 }

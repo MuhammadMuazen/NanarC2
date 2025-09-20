@@ -50,8 +50,7 @@ pub fn arguments_handler(args: Vec<String>) {
         // Check for the command {{ -pcf, --point-client-file [Path] }}
         else if args[1] == "-pcf" || args[1] == "--point-client-file" {
             
-            println!("[i] Pointing to another clients file...");
-            // TODO Run the poiting to another clients file function
+            crate::configs::point_clients_file(&args[2]);
         
         } else {
             

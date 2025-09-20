@@ -2,7 +2,6 @@
     config.rs: Made by Muhammad Muzen
 
     This file holds all the functions and values needed to minipulate the server files and configurations.
-    
 */
 
 use std::io::Write;
@@ -261,7 +260,48 @@ pub fn remove_all_clients() {
 
 }
 
-pub fn check_config_file() {
+pub fn point_clients_file(file_path_str: &str) {
+
+    // Check existance of the default configuration file
+    if !file_exists(std::path::Path::new(&get_default_config_path())) {
+
+        println!("{}", format!("[-] Error: Could not found the default configuration file in: {}", get_default_config_path()).red());
+        println!("{}", format!("[i] You can run the server once to generate the default configuration file.").blue());
+        std::process::exit(-1);
+    }
+
+    // Check the existance of the file that the user provided as the argument
+    if !file_exists(std::path::Path::new(file_path_str)) {
+
+        println!("{}", format!("[-] Error: File path you specified as the argument does not exist!").red());
+        std::process::exit(-1);
+    }
+
+    // Change the clients file path value
+    let mut config_json_data: serde_json::Value = serde_json::from_str(std::fs::read_to_string(
+        &get_default_config_path()).unwrap().as_str()).unwrap();
+    
+    if let Some(obj) = config_json_data.as_object_mut() {
+
+        obj.insert("clients_file_path".to_string(), serde_json::Value::String(file_path_str.to_string()));
+    }
+
+    // Write back to the config file
+    match std::fs::write(&get_default_config_path(), serde_json::to_string_pretty(&config_json_data).unwrap()) {
+
+        Ok(_) => {
+
+            println!("{}", format!("\n[+] Pointed to new clients file: {}\n", file_path_str).green());
+        },
+        Err(_) => {
+
+            println!("{}", format!("[-] Error: Could not point to the specified clients file: {}", file_path_str).red());
+        }
+    };
+
+}
+
+pub fn check_config_files() {
 
     let nanarc2_dir_path: String = get_nanarc2_dir_path();
     let default_config_path: String = get_default_config_path();
