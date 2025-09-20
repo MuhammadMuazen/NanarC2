@@ -170,25 +170,43 @@ fn get_json_key_value<'a>(json_data: &'a serde_json::Value, key: &str) -> Option
     }
 }
 
-pub fn print_clients(clients_file_str: &str) {
+pub fn print_clients() {
 
-    let clients_file_path: &std::path::Path = std::path::Path::new(clients_file_str);
+    match file_exists(std::path::Path::new(&get_default_config_path())) {
 
-    if file_exists(clients_file_path) {
+        true => {
 
-        println!("\n{0} {1}\n", "[i] Clients file path: ".blue(), clients_file_str.blue());
+            let clients_file_str: String = get_json_key_value(
+            &serde_json::from_str(&std::fs::read_to_string(&get_default_config_path()).unwrap()).unwrap(),
+            "clients_file_path").unwrap().as_str().unwrap().to_string();
+            
+            if file_exists(&std::path::Path::new(&clients_file_str)) {
+            
+                println!("\n{0} {1}\n", "[i] Clients file path: ".blue(), clients_file_str.blue());
+            
+                let clients_file_content: Result<String, std::io::Error> = std::fs::read_to_string(&std::path::Path::new(&clients_file_str));
+            
+                if clients_file_content.is_ok() {
+                
+                    println!("{}", pretty_json(clients_file_content.unwrap().as_str()));
+                
+                } else if clients_file_content.is_err() {
+                
+                    println!("{}", "[-] Error: Could not read the clients json file!".red());
+                }
+            } else {
 
-        let clients_file_content: Result<String, std::io::Error> = std::fs::read_to_string(clients_file_path);
-
-        if clients_file_content.is_ok() {
-
-            println!("{}", pretty_json(clients_file_content.unwrap().as_str()));
+                println!("{}", format!("[-] Error: Clients JSON file does not exists!").red());
+                println!("{}", format!("[i] Run the server at least once to generate it!").blue());
+                std::process::exit(-1);
+            } 
         
-        } else if clients_file_content.is_err() {
+        }, false => {
 
-            println!("{}", "[-] Error: Could not read the clients json file!".red());
+            println!("{}", format!("[-] Error: Could not find the configuration file that have the key:value of the clients file path!").red());
+            println!("{}", format!("[i] You can run the server once to generate the default configuration file and the default clients file").blue());
+            std::process::exit(-1);
         }
-
     }
 }
 

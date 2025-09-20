@@ -16,7 +16,7 @@ pub fn arguments_handler(args: Vec<String>) {
         // Check for the {{ -pc,  --print-clients }} option
         else if args[1] == "-pc" || args[1] == "--print-clients" {
 
-            crate::configs::print_clients(r"C:\Users\muhammad\Desktop\fff.txt") // Change later
+            crate::configs::print_clients() // Change later
         }
         // Check for the {{ -rac, --remove-all-clients }} option
         else if args[1] == "-rac" || args[1] == "--remove-all-clients" {
