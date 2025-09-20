@@ -14,7 +14,7 @@ pub fn get_nanarc2_dir_path() -> String {
     
     if cfg!(target_os = "windows") {
 
-        format!("C:\\Users\\{}\\Documents\\{}", get_username(), NANARC2_DIRECTORY_NAME)
+        format!(r"C:\Users\{}\Documents\{}", get_username(), NANARC2_DIRECTORY_NAME)
 
     } else if cfg!(target_os = "linux") {
         
@@ -46,11 +46,11 @@ pub fn get_default_config_path() -> String {
     
     if cfg!(target_os = "windows") {
         
-        format!("{}\\nanarc2_config.json", get_nanarc2_dir_path())
+        format!(r"{}\nanarc2_config.json", get_nanarc2_dir_path())
     
     } else if cfg!(target_os = "linux") {
         
-        format!("{}/nanarc2_config.json", get_nanarc2_dir_path())
+        format!(r"{}/nanarc2_config.json", get_nanarc2_dir_path())
     
     } else {
         
@@ -62,11 +62,11 @@ pub fn get_default_clients_path() -> String {
     
     if cfg!(target_os = "windows") {
         
-        format!("{}\\clients.json", get_nanarc2_dir_path())
+        format!(r"{}\clients.json", get_nanarc2_dir_path())
     
     } else if cfg!(target_os = "linux") {
         
-        format!("{}/clients.json", get_nanarc2_dir_path())
+        format!(r"{}/clients.json", get_nanarc2_dir_path())
     
     } else {
         
@@ -320,60 +320,69 @@ pub fn check_config_file() {
     };
 
     // 2.4. Checking the server clients file path first in the server configs.json file
-    let clients_file_path: String = serde_json::to_string(get_json_key_value(
-        &serde_json::from_str(&std::fs::read_to_string(&default_config_path).unwrap()).unwrap(),
-        "clients_file_path").unwrap()).unwrap();
+    let clients_file_path: String = get_json_key_value(
+    &serde_json::from_str(&std::fs::read_to_string(&default_config_path).unwrap()).unwrap(),
+    "clients_file_path").unwrap().as_str().unwrap().to_string();
 
-    // TODO check existance and handle the logic
+    if file_exists(&std::path::Path::new(&clients_file_path)) && clients_file_path != default_clients_path {
 
-    // 2.4.1. Check for the default clients json file
-    match file_exists(std::path::Path::new(&default_clients_path)) {
+        if is_valid_json_data(std::fs::read_to_string(&clients_file_path).unwrap().as_str()) {
 
-        true => {
+            println!("{}", format!("[i] Found the clients file specified in the config file: in {}", clients_file_path).blue());
+        
+        } else {
 
-            // 2.4.2. Check if the json format in the clients json file is ok
-            if is_valid_json_data(std::fs::read_to_string(&default_clients_path).unwrap().as_str()) {
+            println!("{}", format!("[-] Error: Invalid JSON format in the specified clients file: {}", clients_file_path).red());
+            std::process::exit(-1);
+        } 
+    
+    } else {
+        // 2.4.1. Check for the default clients json file
+        match file_exists(std::path::Path::new(&default_clients_path)) {
 
-                println!("{}", format!("[i] Found clients json file in: {}", default_clients_path).blue());
-            
-            } else {
+            true => {
+                // 2.4.2. Check if the json format in the clients json file is ok
+                if is_valid_json_data(std::fs::read_to_string(&default_clients_path).unwrap().as_str()) {
 
-                println!("{}", format!("[-] Error: Unvalid json format in the clients json file!").red());
-                std::process::exit(-1);
-            } 
-        // 2.4.3. Create the default clinets json file if the it does not exist
-        } false => {
+                    println!("{}", format!("[i] Found clients json file in: {}", default_clients_path).blue());
+                
+                } else {
 
-            println!("{}", format!("[-] Error: clients json file could not be found in: {}", default_clients_path).red());
-            println!("{}", format!("[i] Creating new clients.json file in path: {}", default_clients_path).blue());
-            
-            let new_clients_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(&default_clients_path);
-
-            match new_clients_file {
-                // 2.4.4. Create the default clients.json file
-                Ok(file) => {
-                    
-                    //2.4.5. Write the default clients.json content to the default clients.json file
-                    match write_to_file(file, serde_json::to_string_pretty("[]").unwrap().as_str()) {
-                        
-                        true => {
-                            
-                            println!("{}", format!("[+] Finished writing the default clients.json file content successfully!").green());
-                        },
-                        false => {
-                                
-                            println!("{}", format!("[-] Error: Could not write the default clients.json content!").red());
-                            std::process::exit(-1);
-                        }
-                    }
-
-                },
-                Err(_) => {
-                    
-                    println!("{}", format!("[-] Error: Could not create default clients.json file in: {}", default_clients_path));
+                    println!("{}", format!("[-] Error: Unvalid json format in the clients json file!").red());
                     std::process::exit(-1);
+                } 
+            // 2.4.3. Create the default clinets json file if the it does not exist
+            } false => {
+
+                println!("{}", format!("[-] Error: clients json file could not be found in: {}", default_clients_path).red());
+                println!("{}", format!("[i] Creating new clients.json file in path: {}", default_clients_path).blue());
+
+                let new_clients_file: Result<std::fs::File, std::io::Error> = std::fs::File::create(&default_clients_path);
+
+                match new_clients_file {
+                    // 2.4.4. Create the default clients.json file
+                    Ok(file) => {
+                        //2.4.5. Write the default clients.json content to the default clients.json file
+                        match write_to_file(file, serde_json::to_string_pretty("[]").unwrap().as_str()) {
+
+                            true => {
+
+                                println!("{}", format!("[+] Finished writing the default clients.json file content successfully!").green());
+                            },
+                            false => {
+
+                                println!("{}", format!("[-] Error: Could not write the default clients.json content!").red());
+                                std::process::exit(-1);
+                            }
+                        }
+                    },
+                    Err(_) => {
+
+                        println!("{}", format!("[-] Error: Could not create default clients.json file in: {}", default_clients_path));
+                        std::process::exit(-1);
+                    }
                 }
             }
         }
-    }
+}
 }
