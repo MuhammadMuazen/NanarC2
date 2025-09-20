@@ -16,12 +16,12 @@ pub fn arguments_handler(args: Vec<String>) {
         // Check for the {{ -pc,  --print-clients }} option
         else if args[1] == "-pc" || args[1] == "--print-clients" {
 
-            crate::configs::print_clients() // Change later
+            crate::configs::print_clients();
         }
         // Check for the {{ -rac, --remove-all-clients }} option
         else if args[1] == "-rac" || args[1] == "--remove-all-clients" {
 
-            crate::configs::remove_all_clients(r"C:\Users\muhammad\Desktop\vvv.txt"); // Change later
+            crate::configs::remove_all_clients(r""); // TODO Change later
         }
         // Check for the {{ -plc, --print-local-commands }} option
         else if args[1] == "-plc" || args[1] == "--print-local-commands" {

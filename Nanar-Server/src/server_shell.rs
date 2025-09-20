@@ -76,8 +76,8 @@ pub fn server_shell() {
         
         } else if (shell_input_vec_string[0] == "pc" || shell_input_vec_string[0] == "print-clients") && shell_input_vec_string.len() == 1 {
 
-            println!("[i] Printing the content of the clients.jon file");
-            // TODO printing clients.json file function
+            crate::configs::print_clients();
+
         } else if shell_input_vec_string[0] == "pcf" || shell_input_vec_string[0] == "point-client-file" {
 
             println!("[i] Pointing to another clients file...");
