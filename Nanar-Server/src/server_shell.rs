@@ -38,7 +38,7 @@ pub fn server_shell() {
             println!("\n{}\n", "[i] Exiting NanarC2...".blue());
             std::process::exit(0);
 
-        } else if shell_input_vec_string[0] == "clear" && shell_input_vec_string.len() == 1{
+        } else if shell_input_vec_string[0] == "clear" && shell_input_vec_string.len() == 1 {
 
             crate::help::clear_screen()
 
@@ -70,6 +70,8 @@ pub fn server_shell() {
 
             println!("[!] Server configurations...");
             // TODO server config function
+            
+
         } else if (shell_input_vec_string[0] == "prc" || shell_input_vec_string[0] == "print-remote-commands") && shell_input_vec_string.len() == 1 {
 
             crate::help::print_remote_commands();
