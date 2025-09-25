@@ -66,8 +66,12 @@ pub fn print_local_commands() {
         1) socket [local-ip] [local-port]
         2) http [local-ip] [local-port]
         3) https [local-ip] [local-port] [certificate-path]
+        4) nanar-rev-shell [options]:
+            - socket [local-ip] [local-port]
+            - http local-ip] [local-port]
+            - https [local-ip] [local-port] [certificate-path]
 
-    [2] cc, create-client [options] --> Compiles a new client with new ID and communication password and add 
+    [2] crsh, create-revshell [options] --> Compiles a new NanarRevShell with new ID and communication password and add 
         them to the clients.json file (Requires cargo to be installed on your machine):
  
         1) -s, --socket [ip/domain] [port]  Specify the socket the client will connect to.
