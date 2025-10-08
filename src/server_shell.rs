@@ -48,8 +48,69 @@ pub fn server_shell() {
         
         } else if shell_input_vec_string[0] == "l" || shell_input_vec_string[0] == "listener" {
 
-            println!("[i] Setting up the listener...")
-            // TODO listeners function
+            if shell_input_vec_string.len() < 4 {
+
+                println!("{}", format!("[-] Error: command arguments are missing or incorrect!").red());
+                println!("{}", format!("[i] You can check the help message by using the command {{ help }}.").blue());
+            
+            } else if shell_input_vec_string.len() == 4 && (shell_input_vec_string[1] == "socket" || shell_input_vec_string[1] == "http") {
+
+                let local_host: &str = shell_input_vec_string[2].as_str();
+                let local_port: &str = shell_input_vec_string[3].as_str();
+
+                if shell_input_vec_string[1] == "socket" {
+                    // TODO
+                    crate::listeners::setup_socket_listener(&local_host, &local_port);
+                
+                } else if shell_input_vec_string[1] == "http" {
+                    // TODO
+                    crate::listeners::setup_http_listener(&local_host, &local_port);
+                }
+            
+            } else if shell_input_vec_string.len() == 5 && shell_input_vec_string[1] == "https" {
+
+                let local_host: &str = shell_input_vec_string[2].as_str();
+                let local_port: &str = shell_input_vec_string[3].as_str();
+                let certificate_path: &str = shell_input_vec_string[4].as_str();
+                // TODO
+                crate::listeners::setup_https_listener(&local_host, &local_port, &certificate_path);
+
+            } else if shell_input_vec_string[1] == "nanar-rev-shell" && shell_input_vec_string.len() > 4 {
+
+                if shell_input_vec_string[2] == "socket" && shell_input_vec_string.len() == 5 {
+
+                    let local_host: &str = shell_input_vec_string[3].as_str();
+                    let local_port: &str = shell_input_vec_string[4].as_str();
+                    // TDOO setup the nanar reverse shell socket type
+                    crate::listeners::setup_nanar_revshell_socket(&local_host, &local_port);
+                
+                } else if shell_input_vec_string[2] == "http" && shell_input_vec_string.len() == 5 {
+
+                    let local_host: &str = shell_input_vec_string[3].as_str();
+                    let local_port: &str = shell_input_vec_string[4].as_str();
+                    // TDOO setup the nanar reverse shell HTTP type
+                    crate::listeners::setup_nanar_revshell_http(&local_host, &local_port);
+                
+                } else if shell_input_vec_string[2] == "https" && shell_input_vec_string.len() == 6 {
+
+                    let local_host: &str = shell_input_vec_string[3].as_str();
+                    let local_port: &str = shell_input_vec_string[4].as_str();
+                    let certificate_path: &str = shell_input_vec_string[5].as_str();
+                    // TDOO setup the nanar reverse shell HTTP type
+                    crate::listeners::setup_nanar_revshell_https(&local_host, &local_port, &certificate_path);
+                
+                } else {
+                    
+                    println!("{}", format!("[-] Error: command arguments are missing or incorrect!").red());
+                    println!("{}", format!("[i] You can check the help message by using the command {{ help }}.").blue());
+                }
+
+            } else {
+      
+                println!("{}", format!("[-] Error: command arguments are missing or incorrect!").red());
+                println!("{}", format!("[i] You can check the help message by using the command {{ help }}.").blue());
+            }
+
         } else if shell_input_vec_string[0] == "cc" || shell_input_vec_string[0] == "create-client" {
             
             println!("[i] Creating client...");

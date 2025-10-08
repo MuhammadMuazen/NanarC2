@@ -63,13 +63,13 @@ pub fn print_local_commands() {
 
     [1] l, listener [options] --> Make the server listen in the background in a way specifed by the options:
 
-        1) socket [local-ip] [local-port]
-        2) http [local-ip] [local-port]
-        3) https [local-ip] [local-port] [certificate-path]
+        1) socket [local-ip/hostname] [local-port]
+        2) http [local-ip/hostname] [local-port]
+        3) https [local-ip/hostname] [local-port] [certificate-path]
         4) nanar-rev-shell [options]:
-            - socket [local-ip] [local-port]
-            - http local-ip] [local-port]
-            - https [local-ip] [local-port] [certificate-path]
+            - socket [local-ip/hostname] [local-port]
+            - http [local-ip/hostname] [local-port]
+            - https [local-ip/hostname] [local-port] [certificate-path]
 
     [2] crsh, create-revshell [options] --> Compiles a new NanarRevShell with new ID and communication password and add 
         them to the clients.json file (Requires cargo to be installed on your machine):
